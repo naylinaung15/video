@@ -1,42 +1,65 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="my">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VideoHub - Complete Video Platform</title>
+    <title>VideoHub - အပြည့်အစုံ ဗီဒီယို ပလက်ဖောင်း</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        * {
+            font-family: 'Inter', 'Myanmar Text', sans-serif;
+        }
+        
         .video-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 24px;
         }
+        
+        @media (max-width: 640px) {
+            .video-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+        }
+        
         .video-card {
             background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             overflow: hidden;
-            transition: transform 0.2s;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(229, 231, 235, 0.8);
         }
+        
         .video-card:hover {
-            transform: translateY(-2px);
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
+        
         .upload-area {
-            border: 2px dashed #cbd5e0;
-            border-radius: 8px;
-            padding: 40px;
+            border: 3px dashed #d1d5db;
+            border-radius: 12px;
+            padding: 48px 24px;
             text-align: center;
             cursor: pointer;
-            transition: border-color 0.2s;
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
         }
+        
         .upload-area:hover {
-            border-color: #4299e1;
+            border-color: #3b82f6;
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
         }
+        
         .upload-area.dragover {
-            border-color: #3182ce;
-            background-color: #ebf8ff;
+            border-color: #1d4ed8;
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            transform: scale(1.02);
         }
+        
         .modal {
             display: none;
             position: fixed;
@@ -44,89 +67,297 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.75);
             z-index: 1000;
+            backdrop-filter: blur(4px);
         }
+        
         .modal.active {
             display: flex;
             align-items: center;
             justify-content: center;
+            animation: fadeIn 0.3s ease;
         }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .modal-content {
+            animation: slideIn 0.3s ease;
+            max-height: 95vh;
+            overflow-y: auto;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
         .video-editor {
             background: white;
-            border-radius: 12px;
-            padding: 20px;
-            max-width: 800px;
-            width: 90%;
-            max-height: 90%;
-            overflow-y: auto;
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 900px;
+            width: 95%;
         }
+        
         .timeline {
-            background: #f7fafc;
-            height: 60px;
-            border-radius: 6px;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            height: 80px;
+            border-radius: 8px;
             position: relative;
-            margin: 20px 0;
+            margin: 24px 0;
+            border: 1px solid #e2e8f0;
         }
+        
         .progress-bar {
-            height: 4px;
-            background: #4299e1;
-            border-radius: 2px;
-            transition: width 0.1s;
+            height: 6px;
+            background: linear-gradient(90deg, #3b82f6 0%, #1d4ed8 100%);
+            border-radius: 3px;
+            transition: width 0.2s ease;
+            box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
         }
+        
         .filter-preview {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-            gap: 10px;
-            margin: 10px 0;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 12px;
+            margin: 16px 0;
         }
+        
         .filter-option {
-            padding: 10px;
-            border: 2px solid #e2e8f0;
-            border-radius: 6px;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
             cursor: pointer;
             text-align: center;
-            transition: all 0.2s;
+            transition: all 0.3s ease;
+            background: white;
         }
+        
+        .filter-option:hover {
+            border-color: #3b82f6;
+            transform: translateY(-2px);
+        }
+        
         .filter-option.active {
-            border-color: #4299e1;
-            background: #ebf8ff;
+            border-color: #1d4ed8;
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
         }
+        
         .comment-thread {
-            max-height: 300px;
+            max-height: 400px;
             overflow-y: auto;
         }
+        
         .like-animation {
             animation: likeHeartBeat 0.6s ease-in-out;
         }
+        
         @keyframes likeHeartBeat {
             0% { transform: scale(1); }
-            50% { transform: scale(1.2); }
+            25% { transform: scale(1.2); }
+            50% { transform: scale(1.1); }
+            75% { transform: scale(1.15); }
             100% { transform: scale(1); }
+        }
+        
+        .loading-spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #10b981;
+            color: white;
+            padding: 16px 24px;
+            border-radius: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            z-index: 2000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+        
+        .toast.show {
+            transform: translateX(0);
+        }
+        
+        .toast.error {
+            background: #ef4444;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.4);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-success:hover {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.4);
+        }
+        
+        .search-container {
+            position: relative;
+        }
+        
+        .search-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .suggestion-item {
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+        
+        .suggestion-item:hover {
+            background: #f3f4f6;
+        }
+        
+        .video-thumbnail {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .video-thumbnail::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.1) 100%);
+            pointer-events: none;
+        }
+        
+        .play-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .video-card:hover .play-overlay {
+            opacity: 1;
+        }
+        
+        .tag {
+            display: inline-block;
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            color: #1e40af;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            margin: 2px;
+            border: 1px solid #93c5fd;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+        }
+        
+        .empty-state-icon {
+            font-size: 80px;
+            color: #d1d5db;
+            margin-bottom: 24px;
+        }
+        
+        @media (max-width: 768px) {
+            .modal-content {
+                margin: 10px;
+                width: calc(100% - 20px);
+            }
+            
+            .video-editor {
+                padding: 16px;
+                width: 100%;
+            }
+            
+            .filter-preview {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
     </style>
 </head>
-<body class="bg-gray-100">
+<body class="bg-gray-50">
     <!-- Header -->
-    <header class="bg-white shadow-md">
-        <div class="container mx-auto px-4 py-3">
+    <header class="bg-white shadow-lg border-b border-gray-200 sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-4">
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-4">
-                    <h1 class="text-2xl font-bold text-blue-600">
-                        <i class="fas fa-video mr-2"></i>VideoHub
+                    <h1 class="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                        <i class="fas fa-video mr-2 text-blue-600"></i>VideoHub
                     </h1>
+                    <span class="hidden md:block text-sm text-gray-500 bg-blue-50 px-3 py-1 rounded-full">
+                        ပရော်ဖက်ရှင်နယ် ဗီဒီယို ပလက်ဖောင်း
+                    </span>
                 </div>
                 <div class="flex items-center space-x-4">
-                    <div class="relative">
-                        <input type="text" id="searchInput" placeholder="Search videos..." 
-                               class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                    <div class="search-container">
+                        <div class="relative">
+                            <input type="text" id="searchInput" placeholder="ဗီဒီယိုများ ရှာဖွေရန်..." 
+                                   class="pl-12 pr-4 py-3 w-64 md:w-80 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                            <i class="fas fa-search absolute left-4 top-4 text-gray-400"></i>
+                            <div id="searchLoader" class="absolute right-4 top-4 loading-spinner hidden"></div>
+                        </div>
+                        <div id="searchSuggestions" class="search-suggestions hidden"></div>
                     </div>
-                    <button id="uploadBtn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
-                        <i class="fas fa-upload mr-2"></i>Upload
+                    <button id="uploadBtn" class="btn-primary text-white px-6 py-3 rounded-full hover:shadow-lg transition-all font-medium">
+                        <i class="fas fa-cloud-upload-alt mr-2"></i>
+                        <span class="hidden md:inline">အပ်လုဒ်</span>
                     </button>
-                    <button id="loginBtn" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
-                        <i class="fas fa-sign-in-alt mr-2"></i>Login
+                    <button id="loginBtn" class="btn-success text-white px-6 py-3 rounded-full hover:shadow-lg transition-all font-medium">
+                        <i class="fas fa-sign-in-alt mr-2"></i>
+                        <span class="hidden md:inline">ဝင်ရောက်ရန်</span>
                     </button>
                 </div>
             </div>
@@ -137,27 +368,139 @@
     <main class="container mx-auto px-4 py-8">
         <!-- Upload Section -->
         <div id="uploadSection" class="mb-8 hidden">
-            <div class="bg-white rounded-lg shadow-md p-6">
-                <h2 class="text-xl font-semibold mb-4">Upload Video</h2>
+            <div class="bg-white rounded-2xl shadow-lg p-8 border border-gray-200">
+                <h2 class="text-2xl font-bold mb-6 flex items-center">
+                    <i class="fas fa-video mr-3 text-blue-600"></i>
+                    ဗီဒီယို အပ်လုဒ် လုပ်ရန်
+                </h2>
                 <div class="upload-area" id="uploadArea">
-                    <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
-                    <p class="text-gray-600 mb-2">Drag and drop your video here or click to browse</p>
-                    <p class="text-sm text-gray-400">Supports MP4, MOV, AVI files</p>
+                    <i class="fas fa-cloud-upload-alt text-6xl text-blue-400 mb-6"></i>
+                    <h3 class="text-xl font-semibold mb-2 text-gray-700">ဗီဒီယိုကို ဤနေရာတွင် ချထားပါ</h3>
+                    <p class="text-gray-500 mb-4">သို့မဟုတ် ရွေးချယ်ရန် နှိပ်ပါ</p>
+                    <p class="text-sm text-gray-400">MP4, MOV, AVI ဖိုင်များကို သပ်ပေါက်သည်</p>
                     <input type="file" id="videoInput" accept="video/*" class="hidden">
                 </div>
-                <div id="uploadProgress" class="mt-4 hidden">
-                    <div class="bg-gray-200 rounded-full h-2">
-                        <div class="progress-bar"></div>
+                <div id="uploadProgress" class="mt-6 hidden">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm font-medium text-gray-700">အပ်လုဒ် လုပ်နေသည်...</span>
+                        <span id="progressPercent" class="text-sm text-blue-600 font-semibold">0%</span>
+                    </div>
+                    <div class="bg-gray-200 rounded-full h-3">
+                        <div class="progress-bar h-3 rounded-full"></div>
                     </div>
                 </div>
-                <div id="videoDetails" class="mt-4 hidden">
-                    <input type="text" id="videoTitle" placeholder="Video Title" class="w-full p-2 border border-gray-300 rounded mb-2">
-                    <textarea id="videoDescription" placeholder="Video Description" class="w-full p-2 border border-gray-300 rounded mb-2" rows="3"></textarea>
-                    <input type="text" id="videoTags" placeholder="Tags (comma separated)" class="w-full p-2 border border-gray-300 rounded mb-2">
-                    <button id="saveVideo" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
-                        <i class="fas fa-save mr-2"></i>Save Video
+                <div id="videoDetails" class="mt-6 hidden space-y-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">ဗီဒီယို ခေါင်းစဉ်</label>
+                        <input type="text" id="videoTitle" placeholder="သင်၏ ဗီဒီယို ခေါင်းစဉ်ကို ရေးပါ" 
+                               class="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">ဖော်ပြချက်</label>
+                        <textarea id="videoDescription" placeholder="ဗီဒီယို အကြောင်း ဖော်ပြပါ" 
+                                  class="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" rows="4"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">တဂ်များ</label>
+                        <input type="text" id="videoTags" placeholder="တဂ်များကို ကော်မာ(,) ဖြင့် ခွဲရေးပါ" 
+                               class="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <button id="saveVideo" class="btn-success text-white px-8 py-4 rounded-lg font-semibold w-full md:w-auto">
+                        <i class="fas fa-save mr-2"></i>ဗီဒီယို သိမ်းဆည်းရန်
                     </button>
                 </div>
+            </div>
+        </div>
+
+        <!-- Statistics -->
+        <div id="statsSection" class="mb-8 grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div class="bg-white rounded-xl p-6 shadow-md border border-gray-200">
+                <div class="flex items-center">
+                    <div class="bg-blue-100 p-3 rounded-full">
+                        <i class="fas fa-video text-blue-600 text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-gray-500 text-sm">စုစုပေါင်း ဗီဒီယို</p>
+                        <p id="totalVideos" class="text-2xl font-bold text-gray-800">0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl p-6 shadow-md border border-gray-200">
+                <div class="flex items-center">
+                    <div class="bg-green-100 p-3 rounded-full">
+                        <i class="fas fa-eye text-green-600 text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-gray-500 text-sm">စုစုပေါင်း ကြည့်ရှုမှု</p>
+                        <p id="totalViews" class="text-2xl font-bold text-gray-800">0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl p-6 shadow-md border border-gray-200">
+                <div class="flex items-center">
+                    <div class="bg-red-100 p-3 rounded-full">
+                        <i class="fas fa-heart text-red-600 text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-gray-500 text-sm">စုစုပေါင်း လိုက်</p>
+                        <p id="totalLikes" class="text-2xl font-bold text-gray-800">0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl p-6 shadow-md border border-gray-200">
+                <div class="flex items-center">
+                    <div class="bg-purple-100 p-3 rounded-full">
+                        <i class="fas fa-users text-purple-600 text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-gray-500 text-sm">စုစုပေါင်း အသုံးပြုသူ</p>
+                        <p id="totalUsers" class="text-2xl font-bold text-gray-800">0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter and Sort -->
+        <div class="mb-6 bg-white rounded-xl p-6 shadow-md border border-gray-200">
+            <div class="flex flex-wrap items-center justify-between gap-4">
+                <div class="flex flex-wrap items-center gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">အမျိုးအစား</label>
+                        <select id="categoryFilter" class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">အားလုံး</option>
+                            <option value="entertainment">ဖျော်ဖြေရေး</option>
+                            <option value="education">ပညာရေး</option>
+                            <option value="music">ဂီတ</option>
+                            <option value="sports">အားကစား</option>
+                            <option value="technology">နည်းပညာ</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">အစီအစဉ်</label>
+                        <select id="sortBy" class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="newest">အသစ်ဆုံး</option>
+                            <option value="oldest">အဟောင်းဆုံး</option>
+                            <option value="popular">လူကြိုက်များ</option>
+                            <option value="views">ကြည့်ရှုမှု အများဆုံး</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button id="gridView" class="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                        <i class="fas fa-th-large"></i>
+                    </button>
+                    <button id="listView" class="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                        <i class="fas fa-list"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loadingState" class="hidden">
+            <div class="flex items-center justify-center py-12">
+                <div class="loading-spinner w-8 h-8 mr-3"></div>
+                <span class="text-gray-600">ဗီဒီယိုများ ရယူနေသည်...</span>
             </div>
         </div>
 
@@ -167,57 +510,80 @@
         </div>
 
         <!-- No Videos Message -->
-        <div id="noVideos" class="text-center py-12">
-            <i class="fas fa-video-slash text-6xl text-gray-300 mb-4"></i>
-            <h3 class="text-xl text-gray-500 mb-2">No videos yet</h3>
-            <p class="text-gray-400">Upload your first video to get started!</p>
+        <div id="noVideos" class="empty-state hidden">
+            <div class="empty-state-icon">
+                <i class="fas fa-video-slash"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-600 mb-2">ဗီဒီယို မရှိသေးပါ</h3>
+            <p class="text-gray-500 mb-6">သင်၏ ပထမဆုံး ဗီဒီယိုကို အပ်လုဒ် လုပ်ပါ!</p>
+            <button onclick="document.getElementById('uploadBtn').click()" class="btn-primary text-white px-6 py-3 rounded-lg font-medium">
+                <i class="fas fa-plus mr-2"></i>ပထမဆုံး ဗီဒီယို အပ်လုဒ် လုပ်ရန်
+            </button>
         </div>
     </main>
 
     <!-- Video Player Modal -->
     <div id="videoModal" class="modal">
-        <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 overflow-hidden">
-            <div class="flex justify-between items-center p-4 border-b">
-                <h3 id="modalVideoTitle" class="text-lg font-semibold"></h3>
-                <div class="flex space-x-2">
-                    <button id="editVideoBtn" class="text-blue-600 hover:text-blue-800">
-                        <i class="fas fa-edit"></i>
+        <div class="modal-content bg-white rounded-2xl shadow-2xl max-w-6xl w-full mx-4 overflow-hidden">
+            <div class="flex justify-between items-center p-6 border-b border-gray-200 bg-gray-50">
+                <h3 id="modalVideoTitle" class="text-xl font-bold text-gray-800"></h3>
+                <div class="flex space-x-3">
+                    <button id="editVideoBtn" class="text-blue-600 hover:text-blue-800 p-2 rounded-lg hover:bg-blue-50 transition-colors">
+                        <i class="fas fa-edit text-lg"></i>
                     </button>
-                    <button id="downloadVideoBtn" class="text-green-600 hover:text-green-800">
-                        <i class="fas fa-download"></i>
+                    <button id="shareVideoBtn" class="text-green-600 hover:text-green-800 p-2 rounded-lg hover:bg-green-50 transition-colors">
+                        <i class="fas fa-share-alt text-lg"></i>
                     </button>
-                    <button id="closeModal" class="text-gray-600 hover:text-gray-800">
-                        <i class="fas fa-times"></i>
+                    <button id="downloadVideoBtn" class="text-purple-600 hover:text-purple-800 p-2 rounded-lg hover:bg-purple-50 transition-colors">
+                        <i class="fas fa-download text-lg"></i>
+                    </button>
+                    <button id="closeModal" class="text-gray-600 hover:text-gray-800 p-2 rounded-lg hover:bg-gray-100 transition-colors">
+                        <i class="fas fa-times text-lg"></i>
                     </button>
                 </div>
             </div>
-            <div class="p-4">
-                <video id="modalVideo" controls playsinline webkit-playsinline class="w-full rounded-lg mb-4">
+            <div class="p-6">
+                <video id="modalVideo" controls playsinline webkit-playsinline class="w-full rounded-xl mb-6 shadow-lg">
                 </video>
-                <div class="flex items-center justify-between mb-4">
-                    <div class="flex items-center space-x-4">
-                        <button id="likeBtn" class="flex items-center space-x-1 text-gray-600 hover:text-red-500">
-                            <i class="far fa-heart"></i>
-                            <span id="likeCount">0</span>
+                <div class="flex items-center justify-between mb-6 flex-wrap gap-4">
+                    <div class="flex items-center space-x-6">
+                        <button id="likeBtn" class="flex items-center space-x-2 text-gray-600 hover:text-red-500 transition-colors p-2 rounded-lg hover:bg-gray-50">
+                            <i class="far fa-heart text-xl"></i>
+                            <span id="likeCount" class="font-semibold">0</span>
                         </button>
-                        <span id="viewCount" class="text-gray-500">0 views</span>
+                        <div class="flex items-center space-x-2 text-gray-500">
+                            <i class="fas fa-eye"></i>
+                            <span id="viewCount" class="font-medium">0 ကြည့်ရှုမှု</span>
+                        </div>
+                        <div class="flex items-center space-x-2 text-gray-500">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span id="uploadDate" class="font-medium"></span>
+                        </div>
                     </div>
-                    <span id="uploadDate" class="text-gray-500"></span>
+                    <div class="flex items-center space-x-2 text-gray-500">
+                        <i class="fas fa-user"></i>
+                        <span id="uploaderName" class="font-medium"></span>
+                    </div>
                 </div>
-                <p id="modalVideoDescription" class="text-gray-700 mb-4"></p>
-                <div id="modalVideoTags" class="mb-4"></div>
+                <p id="modalVideoDescription" class="text-gray-700 mb-4 leading-relaxed"></p>
+                <div id="modalVideoTags" class="mb-6"></div>
                 
                 <!-- Comments Section -->
-                <div class="border-t pt-4">
-                    <h4 class="font-semibold mb-2">Comments</h4>
-                    <div class="flex mb-4">
-                        <input type="text" id="commentInput" placeholder="Add a comment..." 
-                               class="flex-1 p-2 border border-gray-300 rounded-l">
-                        <button id="addComment" class="bg-blue-600 text-white px-4 py-2 rounded-r hover:bg-blue-700">
-                            Post
+                <div class="border-t border-gray-200 pt-6">
+                    <h4 class="font-bold text-lg mb-4 flex items-center">
+                        <i class="fas fa-comments mr-2 text-blue-600"></i>
+                        မှတ်ချက်များ
+                    </h4>
+                    <div class="flex mb-6 gap-3">
+                        <div class="flex-1">
+                            <textarea id="commentInput" placeholder="မှတ်ချက် ရေးရန်..." 
+                                      class="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" rows="2"></textarea>
+                        </div>
+                        <button id="addComment" class="btn-primary text-white px-6 py-4 rounded-lg font-medium self-end">
+                            <i class="fas fa-paper-plane mr-2"></i>ပို့ရန်
                         </button>
                     </div>
-                    <div id="commentsContainer" class="comment-thread space-y-3">
+                    <div id="commentsContainer" class="comment-thread space-y-4">
                         <!-- Comments will be loaded here -->
                     </div>
                 </div>
@@ -227,73 +593,97 @@
 
     <!-- Video Editor Modal -->
     <div id="editorModal" class="modal">
-        <div class="video-editor">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-semibold">Video Editor</h3>
-                <button id="closeEditor" class="text-gray-600 hover:text-gray-800">
-                    <i class="fas fa-times"></i>
+        <div class="modal-content video-editor">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold flex items-center">
+                    <i class="fas fa-cut mr-3 text-purple-600"></i>
+                    ဗီဒီယို တည်းဖြတ်ရန်
+                </h3>
+                <button id="closeEditor" class="text-gray-600 hover:text-gray-800 p-2 rounded-lg hover:bg-gray-100 transition-colors">
+                    <i class="fas fa-times text-xl"></i>
                 </button>
             </div>
             
-            <video id="editorVideo" controls playsinline webkit-playsinline class="w-full rounded-lg mb-4">
+            <video id="editorVideo" controls playsinline webkit-playsinline class="w-full rounded-xl mb-6 shadow-lg">
             </video>
             
             <!-- Timeline -->
             <div class="timeline" id="timeline">
-                <div class="absolute top-0 left-0 w-1 h-full bg-red-500" id="playhead" style="left: 0%;"></div>
+                <div class="absolute top-0 left-0 w-1 h-full bg-red-500 shadow-lg" id="playhead" style="left: 0%;"></div>
+                <div class="absolute bottom-2 left-2 text-xs text-gray-600 font-medium">စတင်ချိန်</div>
+                <div class="absolute bottom-2 right-2 text-xs text-gray-600 font-medium">ပြီးဆုံးချိန်</div>
             </div>
             
             <!-- Controls -->
-            <div class="grid grid-cols-2 gap-4 mb-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div>
-                    <label class="block text-sm font-medium mb-1">Start Time (seconds)</label>
-                    <input type="number" id="startTime" min="0" step="0.1" class="w-full p-2 border border-gray-300 rounded">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">စတင်ချိန် (စက္ကန့်)</label>
+                    <input type="number" id="startTime" min="0" step="0.1" 
+                           class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium mb-1">End Time (seconds)</label>
-                    <input type="number" id="endTime" min="0" step="0.1" class="w-full p-2 border border-gray-300 rounded">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">ပြီးဆုံးချိန် (စက္ကန့်)</label>
+                    <input type="number" id="endTime" min="0" step="0.1" 
+                           class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
             </div>
             
             <!-- Filters -->
-            <div class="mb-4">
-                <label class="block text-sm font-medium mb-2">Filters</label>
+            <div class="mb-6">
+                <label class="block text-sm font-semibold text-gray-700 mb-3">ဖီလ်တာများ</label>
                 <div class="filter-preview">
                     <div class="filter-option active" data-filter="none">
-                        <div class="w-full h-16 bg-gray-200 rounded mb-1"></div>
-                        <span class="text-xs">None</span>
+                        <div class="w-full h-20 bg-gradient-to-br from-gray-200 to-gray-300 rounded-lg mb-2"></div>
+                        <span class="text-sm font-medium">မူလ</span>
                     </div>
                     <div class="filter-option" data-filter="grayscale(100%)">
-                        <div class="w-full h-16 bg-gray-400 rounded mb-1"></div>
-                        <span class="text-xs">B&W</span>
+                        <div class="w-full h-20 bg-gradient-to-br from-gray-400 to-gray-600 rounded-lg mb-2"></div>
+                        <span class="text-sm font-medium">အဖြူအမည်း</span>
                     </div>
                     <div class="filter-option" data-filter="sepia(100%)">
-                        <div class="w-full h-16 bg-yellow-200 rounded mb-1"></div>
-                        <span class="text-xs">Sepia</span>
+                        <div class="w-full h-20 bg-gradient-to-br from-yellow-200 to-yellow-400 rounded-lg mb-2"></div>
+                        <span class="text-sm font-medium">စီပီယာ</span>
                     </div>
                     <div class="filter-option" data-filter="contrast(150%)">
-                        <div class="w-full h-16 bg-gray-800 rounded mb-1"></div>
-                        <span class="text-xs">High Contrast</span>
+                        <div class="w-full h-20 bg-gradient-to-br from-gray-800 to-black rounded-lg mb-2"></div>
+                        <span class="text-sm font-medium">ကွဲပြားမှု မြင့်</span>
+                    </div>
+                    <div class="filter-option" data-filter="brightness(1.3)">
+                        <div class="w-full h-20 bg-gradient-to-br from-yellow-100 to-yellow-200 rounded-lg mb-2"></div>
+                        <span class="text-sm font-medium">တောက်ပမှု</span>
+                    </div>
+                    <div class="filter-option" data-filter="saturate(1.5)">
+                        <div class="w-full h-20 bg-gradient-to-br from-red-200 to-blue-200 rounded-lg mb-2"></div>
+                        <span class="text-sm font-medium">အရောင် ကြင်း</span>
                     </div>
                 </div>
             </div>
             
             <!-- Volume Control -->
-            <div class="mb-4">
-                <label class="block text-sm font-medium mb-1">Volume</label>
-                <input type="range" id="volumeSlider" min="0" max="1" step="0.1" value="1" class="w-full">
+            <div class="mb-6">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">အသံ ကြီးငယ်</label>
+                <div class="flex items-center space-x-4">
+                    <i class="fas fa-volume-down text-gray-500"></i>
+                    <input type="range" id="volumeSlider" min="0" max="1" step="0.1" value="1" 
+                           class="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                    <i class="fas fa-volume-up text-gray-500"></i>
+                    <span id="volumeValue" class="text-sm font-medium text-gray-600 w-10">100%</span>
+                </div>
             </div>
             
             <!-- Action Buttons -->
-            <div class="flex space-x-2">
-                <button id="previewEdit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-                    <i class="fas fa-play mr-2"></i>Preview
+            <div class="flex flex-wrap gap-3">
+                <button id="previewEdit" class="btn-primary text-white px-6 py-3 rounded-lg font-medium">
+                    <i class="fas fa-play mr-2"></i>ကြိုတင်ကြည့်ရှုရန်
                 </button>
-                <button id="applyEdit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
-                    <i class="fas fa-check mr-2"></i>Apply Changes
+                <button id="applyEdit" class="btn-success text-white px-6 py-3 rounded-lg font-medium">
+                    <i class="fas fa-check mr-2"></i>အပြောင်းအလဲများ အသုံးပြုရန်
                 </button>
-                <button id="resetEdit" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">
-                    <i class="fas fa-undo mr-2"></i>Reset
+                <button id="resetEdit" class="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 font-medium transition-colors">
+                    <i class="fas fa-undo mr-2"></i>မူလအတိုင်း ပြန်ရန်
+                </button>
+                <button id="exportVideo" class="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 font-medium transition-colors">
+                    <i class="fas fa-download mr-2"></i>ထုတ်ယူရန်
                 </button>
             </div>
         </div>
@@ -301,27 +691,45 @@
 
     <!-- Login Modal -->
     <div id="loginModal" class="modal">
-        <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-semibold">Login to VideoHub</h3>
-                <button id="closeLoginModal" class="text-gray-600 hover:text-gray-800">
-                    <i class="fas fa-times"></i>
+        <div class="modal-content bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 mx-4">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gray-800">VideoHub သို့ ဝင်ရောက်ရန်</h3>
+                <button id="closeLoginModal" class="text-gray-600 hover:text-gray-800 p-1 rounded-lg hover:bg-gray-100 transition-colors">
+                    <i class="fas fa-times text-lg"></i>
                 </button>
             </div>
             <div class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium mb-1">Email</label>
-                    <input type="email" id="loginEmail" class="w-full p-2 border border-gray-300 rounded">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">အီးမေးလ်</label>
+                    <input type="email" id="loginEmail" 
+                           class="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                           placeholder="သင်၏ အီးမေးလ် လိပ်စာ">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium mb-1">Password</label>
-                    <input type="password" id="loginPassword" class="w-full p-2 border border-gray-300 rounded">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">စကားဝှက်</label>
+                    <div class="relative">
+                        <input type="password" id="loginPassword" 
+                               class="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                               placeholder="သင်၏ စကားဝှက်">
+                        <button type="button" id="toggleLoginPassword" class="absolute right-3 top-4 text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
                 </div>
-                <button id="doLogin" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
-                    Login
+                <div class="flex items-center justify-between">
+                    <label class="flex items-center">
+                        <input type="checkbox" id="rememberMe" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                        <span class="ml-2 text-sm text-gray-600">မှတ်ထားရန်</span>
+                    </label>
+                    <a href="#" class="text-sm text-blue-600 hover:text-blue-800">စကားဝှက် မေ့သွားသလား?</a>
+                </div>
+                <button id="doLogin" class="w-full btn-primary text-white py-4 rounded-lg font-semibold text-lg">
+                    <span id="loginText">ဝင်ရောက်ရန်</span>
+                    <div id="loginLoader" class="loading-spinner mx-auto hidden"></div>
                 </button>
                 <p class="text-center text-sm text-gray-600">
-                    Don't have an account? <span id="showRegister" class="text-blue-600 cursor-pointer">Register</span>
+                    အကောင့် မရှိသေးဘူးလား? 
+                    <span id="showRegister" class="text-blue-600 cursor-pointer hover:text-blue-800 font-medium">အကောင့် ဖွင့်ရန်</span>
                 </p>
             </div>
         </div>
@@ -329,152 +737,266 @@
 
     <!-- Register Modal -->
     <div id="registerModal" class="modal">
-        <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-semibold">Create an Account</h3>
-                <button id="closeRegisterModal" class="text-gray-600 hover:text-gray-800">
-                    <i class="fas fa-times"></i>
+        <div class="modal-content bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 mx-4">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gray-800">အကောင့် ဖွင့်ရန်</h3>
+                <button id="closeRegisterModal" class="text-gray-600 hover:text-gray-800 p-1 rounded-lg hover:bg-gray-100 transition-colors">
+                    <i class="fas fa-times text-lg"></i>
                 </button>
             </div>
             <div class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium mb-1">Name</label>
-                    <input type="text" id="registerName" class="w-full p-2 border border-gray-300 rounded">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">အမည်</label>
+                    <input type="text" id="registerName" 
+                           class="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                           placeholder="သင်၏ အမည်">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium mb-1">Email</label>
-                    <input type="email" id="registerEmail" class="w-full p-2 border border-gray-300 rounded">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">အီးမေးလ်</label>
+                    <input type="email" id="registerEmail" 
+                           class="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                           placeholder="သင်၍ အီးမေးလ် လိပ်စာ">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium mb-1">Password</label>
-                    <input type="password" id="registerPassword" class="w-full p-2 border border-gray-300 rounded">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">စကားဝှက်</label>
+                    <div class="relative">
+                        <input type="password" id="registerPassword" 
+                               class="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                               placeholder="စကားဝှက် (အနည်းဆုံး ၆ လုံး)">
+                        <button type="button" id="toggleRegisterPassword" class="absolute right-3 top-4 text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium mb-1">Confirm Password</label>
-                    <input type="password" id="registerConfirmPassword" class="w-full p-2 border border-gray-300 rounded">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">စကားဝှက် အတည်ပြုရန်</label>
+                    <div class="relative">
+                        <input type="password" id="registerConfirmPassword" 
+                               class="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                               placeholder="စကားဝှက် ထပ်ရေးပါ">
+                        <button type="button" id="toggleConfirmPassword" class="absolute right-3 top-4 text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
                 </div>
-                <button id="doRegister" class="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700">
-                    Register
+                <div class="flex items-center">
+                    <input type="checkbox" id="agreeTerms" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                    <span class="ml-2 text-sm text-gray-600">
+                        <a href="#" class="text-blue-600 hover:text-blue-800">အသုံးပြုမှု စည်းမျဉ်းများ</a> နှင့် 
+                        <a href="#" class="text-blue-600 hover:text-blue-800">ကိုယ်ရေးကိုယ်တာ မူဝါဒ</a> ကို သဘောတူပါသည်
+                    </span>
+                </div>
+                <button id="doRegister" class="w-full btn-success text-white py-4 rounded-lg font-semibold text-lg">
+                    <span id="registerText">အကောင့် ဖွင့်ရန်</span>
+                    <div id="registerLoader" class="loading-spinner mx-auto hidden"></div>
                 </button>
                 <p class="text-center text-sm text-gray-600">
-                    Already have an account? <span id="showLogin" class="text-blue-600 cursor-pointer">Login</span>
+                    အကောင့် ရှိပြီးသားလား? 
+                    <span id="showLogin" class="text-blue-600 cursor-pointer hover:text-blue-800 font-medium">ဝင်ရောက်ရန်</span>
                 </p>
             </div>
         </div>
     </div>
 
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <div class="flex items-center">
+            <i id="toastIcon" class="fas fa-check-circle mr-3"></i>
+            <span id="toastMessage"></span>
+        </div>
+    </div>
+
+    <!-- Add Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+
     <script>
-       // Firebase configuration from your google-services.json
-    const firebaseConfig = {
-        apiKey: "AIzaSyA02qh_7dEuEuvw-iz85XxK53JAg5XDjs8",
-        authDomain: "store-shop-132fe.firebaseapp.com",
-        databaseURL: "https://store-shop-132fe-default-rtdb.firebaseio.com",
-        projectId: "store-shop-132fe",
-        storageBucket: "store-shop-132fe.appspot.com",
-        messagingSenderId: "438661108177",
-        appId: "1:438661108177:android:c34765aa44ac1cad9650f0"
-    };
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyA02qh_7dEuEuvw-iz85XxK53JAg5XDjs8",
+            authDomain: "store-shop-132fe.firebaseapp.com",
+            databaseURL: "https://store-shop-132fe-default-rtdb.firebaseio.com",
+            projectId: "store-shop-132fe",
+            storageBucket: "store-shop-132fe.appspot.com",
+            messagingSenderId: "438661108177",
+            appId: "1:438661108177:web:c34765aa44ac1cad9650f0"
+        };
 
         // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
         const db = firebase.firestore();
         const storage = firebase.storage();
-        const auth = firebase.auth();
 
-        // Current user state
+        // Global variables
         let currentUser = null;
         let currentVideoFile = null;
         let currentVideoData = null;
         let currentEditingVideo = null;
+        let allVideos = [];
+        let searchTimeout = null;
 
         // DOM elements
-        const uploadBtn = document.getElementById('uploadBtn');
-        const uploadSection = document.getElementById('uploadSection');
-        const uploadArea = document.getElementById('uploadArea');
-        const videoInput = document.getElementById('videoInput');
-        const uploadProgress = document.getElementById('uploadProgress');
-        const videoDetails = document.getElementById('videoDetails');
-        const videoGrid = document.getElementById('videoGrid');
-        const noVideos = document.getElementById('noVideos');
-        const searchInput = document.getElementById('searchInput');
-        const videoModal = document.getElementById('videoModal');
-        const editorModal = document.getElementById('editorModal');
-        const loginModal = document.getElementById('loginModal');
-        const registerModal = document.getElementById('registerModal');
-        const loginBtn = document.getElementById('loginBtn');
+        const elements = {
+            uploadBtn: document.getElementById('uploadBtn'),
+            uploadSection: document.getElementById('uploadSection'),
+            uploadArea: document.getElementById('uploadArea'),
+            videoInput: document.getElementById('videoInput'),
+            uploadProgress: document.getElementById('uploadProgress'),
+            videoDetails: document.getElementById('videoDetails'),
+            videoGrid: document.getElementById('videoGrid'),
+            noVideos: document.getElementById('noVideos'),
+            searchInput: document.getElementById('searchInput'),
+            videoModal: document.getElementById('videoModal'),
+            editorModal: document.getElementById('editorModal'),
+            loginModal: document.getElementById('loginModal'),
+            registerModal: document.getElementById('registerModal'),
+            loginBtn: document.getElementById('loginBtn'),
+            loadingState: document.getElementById('loadingState'),
+            toast: document.getElementById('toast')
+        };
 
-        // Event listeners
-        uploadBtn.addEventListener('click', toggleUploadSection);
-        uploadArea.addEventListener('click', () => videoInput.click());
-        uploadArea.addEventListener('dragover', handleDragOver);
-        uploadArea.addEventListener('drop', handleDrop);
-        videoInput.addEventListener('change', handleFileSelect);
-        document.getElementById('saveVideo').addEventListener('click', saveVideo);
-        document.getElementById('closeModal').addEventListener('click', closeVideoModal);
-        document.getElementById('editVideoBtn').addEventListener('click', openVideoEditor);
-        document.getElementById('downloadVideoBtn').addEventListener('click', downloadVideo);
-        document.getElementById('likeBtn').addEventListener('click', toggleLike);
-        document.getElementById('addComment').addEventListener('click', addComment);
-        document.getElementById('closeEditor').addEventListener('click', closeVideoEditor);
-        searchInput.addEventListener('input', searchVideos);
-        loginBtn.addEventListener('click', openLoginModal);
-        document.getElementById('closeLoginModal').addEventListener('click', closeLoginModal);
-        document.getElementById('closeRegisterModal').addEventListener('click', closeRegisterModal);
-        document.getElementById('doLogin').addEventListener('click', loginUser);
-        document.getElementById('doRegister').addEventListener('click', registerUser);
-        document.getElementById('showRegister').addEventListener('click', showRegister);
-        document.getElementById('showLogin').addEventListener('click', showLogin);
+        // Utility Functions
+        function showToast(message, type = 'success') {
+            const toast = elements.toast;
+            const icon = document.getElementById('toastIcon');
+            const messageEl = document.getElementById('toastMessage');
+            
+            messageEl.textContent = message;
+            toast.className = `toast ${type}`;
+            
+            if (type === 'success') {
+                icon.className = 'fas fa-check-circle mr-3';
+            } else if (type === 'error') {
+                icon.className = 'fas fa-exclamation-circle mr-3';
+            } else if (type === 'info') {
+                icon.className = 'fas fa-info-circle mr-3';
+            }
+            
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 4000);
+        }
 
-        // Video editor event listeners
-        document.getElementById('previewEdit').addEventListener('click', previewEdit);
-        document.getElementById('applyEdit').addEventListener('click', applyEdit);
-        document.getElementById('resetEdit').addEventListener('click', resetEdit);
-        document.getElementById('volumeSlider').addEventListener('input', updateVolume);
+        function showLoading(show = true) {
+            elements.loadingState.classList.toggle('hidden', !show);
+            elements.videoGrid.classList.toggle('hidden', show);
+            elements.noVideos.classList.add('hidden');
+        }
 
-        // Filter selection
-        document.querySelectorAll('.filter-option').forEach(option => {
-            option.addEventListener('click', selectFilter);
-        });
+        function formatFileSize(bytes) {
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            if (bytes === 0) return '0 Bytes';
+            const i = Math.floor(Math.log(bytes) / Math.log(1024));
+            return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
+        }
 
-        // Authentication state observer
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffTime = Math.abs(now - date);
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            
+            if (diffDays === 0) return 'ယနေ့';
+            if (diffDays === 1) return '၁ ရက် အရင်';
+            if (diffDays < 7) return `${diffDays} ရက် အရင်`;
+            if (diffDays < 30) return `${Math.floor(diffDays / 7)} ပတ် အရင်`;
+            if (diffDays < 365) return `${Math.floor(diffDays / 30)} လ အရင်`;
+            return `${Math.floor(diffDays / 365)} နှစ် အရင်`;
+        }
+
+        function validateEmail(email) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        }
+
+        function validatePassword(password) {
+            return password.length >= 6;
+        }
+
+        // Authentication Functions
         auth.onAuthStateChanged(user => {
             currentUser = user;
             updateUI();
             loadVideos();
+            updateStats();
+            
+            if (user) {
+                showToast(`မင်္ဂလာပါ ${user.displayName || user.email}!`, 'success');
+            }
         });
 
         function updateUI() {
             if (currentUser) {
-                loginBtn.innerHTML = `<i class="fas fa-user mr-2"></i>${currentUser.displayName || currentUser.email}`;
-                uploadBtn.disabled = false;
+                elements.loginBtn.innerHTML = `
+                    <i class="fas fa-user mr-2"></i>
+                    <span class="hidden md:inline">${currentUser.displayName || currentUser.email}</span>
+                `;
+                elements.uploadBtn.disabled = false;
+                elements.uploadBtn.classList.remove('opacity-50', 'cursor-not-allowed');
             } else {
-                loginBtn.innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i>Login';
-                uploadBtn.disabled = true;
+                elements.loginBtn.innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i><span class="hidden md:inline">ဝင်ရောက်ရန်</span>';
+                elements.uploadBtn.disabled = true;
+                elements.uploadBtn.classList.add('opacity-50', 'cursor-not-allowed');
             }
         }
 
+        async function updateStats() {
+            try {
+                const videosSnapshot = await db.collection('videos').get();
+                const usersSnapshot = await db.collection('users').get();
+                
+                let totalViews = 0;
+                let totalLikes = 0;
+                
+                videosSnapshot.forEach(doc => {
+                    const data = doc.data();
+                    totalViews += data.views || 0;
+                    totalLikes += data.likes || 0;
+                });
+                
+                document.getElementById('totalVideos').textContent = videosSnapshot.size;
+                document.getElementById('totalViews').textContent = totalViews.toLocaleString();
+                document.getElementById('totalLikes').textContent = totalLikes.toLocaleString();
+                document.getElementById('totalUsers').textContent = usersSnapshot.size;
+            } catch (error) {
+                console.error('Error updating stats:', error);
+            }
+        }
+
+        // Upload Functions
         function toggleUploadSection() {
             if (!currentUser) {
-                alert('Please login to upload videos');
+                showToast('ဗီဒီယို အပ်လုဒ် လုပ်ရန် ကျေးဇူးပြု၍ ဝင်ရောက်ပါ', 'error');
                 openLoginModal();
                 return;
             }
             
-            const isHidden = uploadSection.classList.contains('hidden');
-            uploadSection.classList.toggle('hidden', !isHidden);
+            const isHidden = elements.uploadSection.classList.contains('hidden');
+            elements.uploadSection.classList.toggle('hidden', !isHidden);
         }
 
         function handleDragOver(e) {
             e.preventDefault();
-            uploadArea.classList.add('dragover');
+            elements.uploadArea.classList.add('dragover');
+        }
+
+        function handleDragLeave(e) {
+            e.preventDefault();
+            elements.uploadArea.classList.remove('dragover');
         }
 
         function handleDrop(e) {
             e.preventDefault();
-            uploadArea.classList.remove('dragover');
+            elements.uploadArea.classList.remove('dragover');
             const files = e.dataTransfer.files;
             if (files.length > 0 && files[0].type.startsWith('video/')) {
                 processVideoFile(files[0]);
+            } else {
+                showToast('ကျေးဇူးပြု၍ ဗီဒီယို ဖိုင်ကိုသာ ရွေးချယ်ပါ', 'error');
             }
         }
 
@@ -482,17 +1004,25 @@
             const file = e.target.files[0];
             if (file && file.type.startsWith('video/')) {
                 processVideoFile(file);
+            } else {
+                showToast('ကျေးဇူးပြု၍ ဗီဒီယို ဖိုင်ကိုသာ ရွေးချယ်ပါ', 'error');
             }
         }
 
         function processVideoFile(file) {
+            // Check file size (max 100MB)
+            if (file.size > 100 * 1024 * 1024) {
+                showToast('ဖိုင် အရွယ်အစား ၁၀၀MB ထက် မကျော်ရပါ', 'error');
+                return;
+            }
+            
             currentVideoFile = file;
             showUploadProgress();
             
             // Simulate upload progress
             let progress = 0;
             const interval = setInterval(() => {
-                progress += Math.random() * 20;
+                progress += Math.random() * 15 + 5;
                 if (progress >= 100) {
                     progress = 100;
                     clearInterval(interval);
@@ -503,35 +1033,42 @@
         }
 
         function showUploadProgress() {
-            uploadProgress.classList.remove('hidden');
-            videoDetails.classList.add('hidden');
+            elements.uploadProgress.classList.remove('hidden');
+            elements.videoDetails.classList.add('hidden');
         }
 
         function updateProgressBar(progress) {
             const progressBar = document.querySelector('.progress-bar');
+            const progressPercent = document.getElementById('progressPercent');
             progressBar.style.width = progress + '%';
+            progressPercent.textContent = Math.round(progress) + '%';
         }
 
         function showVideoDetails() {
-            uploadProgress.classList.add('hidden');
-            videoDetails.classList.remove('hidden');
+            elements.uploadProgress.classList.add('hidden');
+            elements.videoDetails.classList.remove('hidden');
             document.getElementById('videoTitle').value = currentVideoFile.name.replace(/\.[^/.]+$/, "");
+            showToast('ဖိုင် အပ်လုဒ် ပြီးပါပြီ! ဗီဒီယို အချက်အလက်များ ဖြည့်ပါ', 'success');
         }
 
         async function saveVideo() {
             if (!currentUser) {
-                alert('Please login to save videos');
+                showToast('ကျေးဇူးပြု၍ ဝင်ရောက်ပါ', 'error');
                 return;
             }
             
-            const title = document.getElementById('videoTitle').value;
-            const description = document.getElementById('videoDescription').value;
+            const title = document.getElementById('videoTitle').value.trim();
+            const description = document.getElementById('videoDescription').value.trim();
             const tags = document.getElementById('videoTags').value.split(',').map(tag => tag.trim()).filter(tag => tag);
             
             if (!title) {
-                alert('Please enter a video title');
+                showToast('ကျေးဇူးပြု၍ ဗီဒီယို ခေါင်းစဉ် ရေးပါ', 'error');
                 return;
             }
+
+            const saveBtn = document.getElementById('saveVideo');
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<div class="loading-spinner mr-2"></div>သိမ်းဆည်းနေသည်...';
 
             try {
                 // Upload video to Firebase Storage
@@ -541,44 +1078,56 @@
                 
                 uploadTask.on('state_changed', 
                     (snapshot) => {
-                        // Progress tracking
                         const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
                         updateProgressBar(progress);
                     },
                     (error) => {
                         console.error('Upload error:', error);
-                        alert('Error uploading video');
+                        showToast('ဗီဒီယို အပ်လုဒ် လုပ်ရာတွင် အမှား: ' + error.message, 'error');
+                        saveBtn.disabled = false;
+                        saveBtn.innerHTML = '<i class="fas fa-save mr-2"></i>ဗီဒီယို သိမ်းဆည်းရန်';
                     },
                     async () => {
-                        // Upload complete
-                        const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
+                        try {
+                            const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
+                            
+                            // Save video data to Firestore
+                            const videoData = {
+                                title,
+                                description,
+                                tags,
+                                uploadDate: new Date().toISOString(),
+                                fileUrl: downloadURL,
+                                fileName: currentVideoFile.name,
+                                fileSize: currentVideoFile.size,
+                                duration: 0,
+                                views: 0,
+                                likes: 0,
+                                likesBy: [],
+                                userId: currentUser.uid,
+                                userDisplayName: currentUser.displayName || currentUser.email,
+                                category: 'general'
+                            };
+                            
+                            await db.collection('videos').add(videoData);
+                            showToast('ဗီဒီယို အောင်မြင်စွာ အပ်လုဒ် ပြီးပါပြီ!', 'success');
+                            resetUploadForm();
+                            loadVideos();
+                            updateStats();
+                        } catch (error) {
+                            console.error('Error saving video data:', error);
+                            showToast('ဗီဒီယို ဒေတာ သိမ်းဆည်းရာတွင် အမှား: ' + error.message, 'error');
+                        }
                         
-                        // Save video data to Firestore
-                        const videoData = {
-                            title,
-                            description,
-                            tags,
-                            uploadDate: new Date().toISOString(),
-                            fileUrl: downloadURL,
-                            fileName: currentVideoFile.name,
-                            fileSize: currentVideoFile.size,
-                            duration: 0, // Would calculate this in a real app
-                            views: 0,
-                            likes: 0,
-                            likesBy: [],
-                            userId: currentUser.uid,
-                            userDisplayName: currentUser.displayName || currentUser.email
-                        };
-                        
-                        await db.collection('videos').add(videoData);
-                        alert('Video uploaded successfully!');
-                        resetUploadForm();
-                        loadVideos();
+                        saveBtn.disabled = false;
+                        saveBtn.innerHTML = '<i class="fas fa-save mr-2"></i>ဗီဒီယို သိမ်းဆည်းရန်';
                     }
                 );
             } catch (error) {
-                console.error('Error saving video:', error);
-                alert('Error uploading video');
+                console.error('Error uploading video:', error);
+                showToast('ဗီဒီယို အပ်လုဒ် လုပ်ရာတွင် အမှား: ' + error.message, 'error');
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = '<i class="fas fa-save mr-2"></i>ဗီဒီယို သိမ်းဆည်းရန်';
             }
         }
 
@@ -586,56 +1135,54 @@
             document.getElementById('videoTitle').value = '';
             document.getElementById('videoDescription').value = '';
             document.getElementById('videoTags').value = '';
-            videoDetails.classList.add('hidden');
-            uploadSection.classList.add('hidden');
+            elements.videoDetails.classList.add('hidden');
+            elements.uploadSection.classList.add('hidden');
             currentVideoFile = null;
+            document.getElementById('videoInput').value = '';
         }
 
+        // Video Loading and Display Functions
         async function loadVideos() {
+            showLoading(true);
+            
             try {
-                let videos = [];
-                let querySnapshot;
+                const querySnapshot = await db.collection('videos')
+                    .orderBy('uploadDate', 'desc')
+                    .limit(50)
+                    .get();
                 
-                if (currentUser) {
-                    // Load user's videos if logged in
-                    querySnapshot = await db.collection('videos')
-                        .where('userId', '==', currentUser.uid)
-                        .orderBy('uploadDate', 'desc')
-                        .get();
-                } else {
-                    // Load public videos
-                    querySnapshot = await db.collection('videos')
-                        .orderBy('uploadDate', 'desc')
-                        .limit(20)
-                        .get();
-                }
-                
+                allVideos = [];
                 querySnapshot.forEach(doc => {
-                    videos.push({
+                    allVideos.push({
                         id: doc.id,
                         ...doc.data()
                     });
                 });
                 
-                displayVideos(videos);
+                displayVideos(allVideos);
             } catch (error) {
                 console.error('Error loading videos:', error);
+                showToast('ဗီဒီယိုများ ရယူရာတွင် အမှား: ' + error.message, 'error');
+            } finally {
+                showLoading(false);
             }
         }
 
         function displayVideos(videos) {
-            videoGrid.innerHTML = '';
+            elements.videoGrid.innerHTML = '';
             
             if (videos.length === 0) {
-                noVideos.classList.remove('hidden');
+                elements.noVideos.classList.remove('hidden');
+                elements.videoGrid.classList.add('hidden');
                 return;
             }
             
-            noVideos.classList.add('hidden');
+            elements.noVideos.classList.add('hidden');
+            elements.videoGrid.classList.remove('hidden');
             
             videos.forEach(video => {
                 const videoCard = createVideoCard(video);
-                videoGrid.appendChild(videoCard);
+                elements.videoGrid.appendChild(videoCard);
             });
         }
 
@@ -645,24 +1192,41 @@
             card.onclick = () => openVideoModal(video);
             
             card.innerHTML = `
-                <div class="relative">
-                    <video class="w-full h-48 object-cover" preload="metadata">
+                <div class="video-thumbnail relative">
+                    <video class="w-full h-48 object-cover" preload="metadata" muted>
                         <source src="${video.fileUrl}" type="video/mp4">
                     </video>
+                    <div class="play-overlay">
+                        <i class="fas fa-play"></i>
+                    </div>
                     <div class="absolute bottom-2 right-2 bg-black bg-opacity-75 text-white px-2 py-1 rounded text-xs">
                         ${formatFileSize(video.fileSize)}
                     </div>
                 </div>
                 <div class="p-4">
-                    <h3 class="font-semibold text-lg mb-2 line-clamp-2">${video.title}</h3>
-                    <p class="text-gray-600 text-sm mb-2 line-clamp-2">${video.description}</p>
-                    <div class="flex items-center justify-between text-sm text-gray-500">
-                        <span><i class="fas fa-eye mr-1"></i>${video.views}</span>
-                        <span><i class="fas fa-heart mr-1"></i>${video.likes}</span>
-                        <span>${formatDate(video.uploadDate)}</span>
+                    <h3 class="font-bold text-lg mb-2 line-clamp-2 text-gray-800">${video.title}</h3>
+                    <p class="text-gray-600 text-sm mb-3 line-clamp-2">${video.description}</p>
+                    <div class="flex items-center justify-between text-sm text-gray-500 mb-3">
+                        <span class="flex items-center">
+                            <i class="fas fa-eye mr-1 text-blue-500"></i>
+                            ${video.views || 0}
+                        </span>
+                        <span class="flex items-center">
+                            <i class="fas fa-heart mr-1 text-red-500"></i>
+                            ${video.likes || 0}
+                        </span>
+                        <span class="flex items-center">
+                            <i class="fas fa-calendar-alt mr-1 text-green-500"></i>
+                            ${formatDate(video.uploadDate)}
+                        </span>
                     </div>
-                    <div class="mt-2">
-                        ${video.tags.map(tag => `<span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mr-1">${tag}</span>`).join('')}
+                    <div class="flex items-center text-sm text-gray-500 mb-3">
+                        <i class="fas fa-user mr-2"></i>
+                        <span class="font-medium">${video.userDisplayName}</span>
+                    </div>
+                    <div class="flex flex-wrap">
+                        ${video.tags.slice(0, 3).map(tag => `<span class="tag">#${tag}</span>`).join('')}
+                        ${video.tags.length > 3 ? '<span class="tag">+' + (video.tags.length - 3) + '</span>' : ''}
                     </div>
                 </div>
             `;
@@ -670,55 +1234,68 @@
             return card;
         }
 
+        // Video Modal Functions
         async function openVideoModal(video) {
             currentVideoData = video;
             
             // Update view count
-            await db.collection('videos').doc(video.id).update({
-                views: firebase.firestore.FieldValue.increment(1)
-            });
-            currentVideoData.views += 1;
+            try {
+                await db.collection('videos').doc(video.id).update({
+                    views: firebase.firestore.FieldValue.increment(1)
+                });
+                currentVideoData.views = (currentVideoData.views || 0) + 1;
+            } catch (error) {
+                console.error('Error updating view count:', error);
+            }
             
             // Populate modal
             document.getElementById('modalVideoTitle').textContent = video.title;
             document.getElementById('modalVideoDescription').textContent = video.description;
             document.getElementById('modalVideo').src = video.fileUrl;
-            document.getElementById('likeCount').textContent = video.likes;
-            document.getElementById('viewCount').textContent = `${video.views + 1} views`;
+            document.getElementById('likeCount').textContent = video.likes || 0;
+            document.getElementById('viewCount').textContent = `${(video.views || 0) + 1} ကြည့်ရှုမှု`;
             document.getElementById('uploadDate').textContent = formatDate(video.uploadDate);
+            document.getElementById('uploaderName').textContent = video.userDisplayName;
             
             // Update like button state
-            const likeBtn = document.getElementById('likeBtn');
-            const icon = likeBtn.querySelector('i');
-            if (currentUser && video.likesBy && video.likesBy.includes(currentUser.uid)) {
-                icon.classList.add('fas');
-                icon.classList.remove('far');
-            } else {
-                icon.classList.add('far');
-                icon.classList.remove('fas');
-            }
+            updateLikeButton();
             
             // Update tags
             const tagsContainer = document.getElementById('modalVideoTags');
             tagsContainer.innerHTML = video.tags.map(tag => 
-                `<span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mr-1">${tag}</span>`
+                `<span class="tag">#${tag}</span>`
             ).join('');
             
             // Load comments
             loadComments(video.id);
             
-            videoModal.classList.add('active');
+            elements.videoModal.classList.add('active');
+        }
+
+        function updateLikeButton() {
+            const likeBtn = document.getElementById('likeBtn');
+            const icon = likeBtn.querySelector('i');
+            
+            if (currentUser && currentVideoData.likesBy && currentVideoData.likesBy.includes(currentUser.uid)) {
+                icon.classList.remove('far');
+                icon.classList.add('fas');
+                likeBtn.classList.add('text-red-500');
+            } else {
+                icon.classList.remove('fas');
+                icon.classList.add('far');
+                likeBtn.classList.remove('text-red-500');
+            }
         }
 
         function closeVideoModal() {
-            videoModal.classList.remove('active');
+            elements.videoModal.classList.remove('active');
             document.getElementById('modalVideo').pause();
             currentVideoData = null;
         }
 
         async function toggleLike() {
             if (!currentVideoData || !currentUser) {
-                alert('Please login to like videos');
+                showToast('လိုက် ခြင်းအတွက် ကျေးဇူးပြု၍ ဝင်ရောက်ပါ', 'error');
                 openLoginModal();
                 return;
             }
@@ -728,42 +1305,48 @@
             const icon = likeBtn.querySelector('i');
             
             const isLiked = icon.classList.contains('fas');
-            let newLikes = currentVideoData.likes;
+            let newLikes = currentVideoData.likes || 0;
             let likesBy = currentVideoData.likesBy || [];
             
             if (isLiked) {
-                // Unlike
-                newLikes--;
+                newLikes = Math.max(0, newLikes - 1);
                 likesBy = likesBy.filter(id => id !== currentUser.uid);
+                showToast('လိုက် ဖျက်လိုက်ပါပြီ', 'info');
             } else {
-                // Like
                 newLikes++;
                 likesBy.push(currentUser.uid);
+                showToast('လိုက် ပေးပါပြီ!', 'success');
             }
             
             // Update UI
-            icon.classList.toggle('fas', !isLiked);
-            icon.classList.toggle('far', isLiked);
             likeCount.textContent = newLikes;
             likeBtn.classList.add('like-animation');
+            updateLikeButton();
             
             setTimeout(() => {
                 likeBtn.classList.remove('like-animation');
             }, 600);
             
             // Update database
-            await db.collection('videos').doc(currentVideoData.id).update({
-                likes: newLikes,
-                likesBy: likesBy
-            });
-            
-            currentVideoData.likes = newLikes;
-            currentVideoData.likesBy = likesBy;
-            
-            // Refresh video grid
-            loadVideos();
+            try {
+                await db.collection('videos').doc(currentVideoData.id).update({
+                    likes: newLikes,
+                    likesBy: likesBy
+                });
+                
+                currentVideoData.likes = newLikes;
+                currentVideoData.likesBy = likesBy;
+                
+                // Update the video card in grid
+                loadVideos();
+                updateStats();
+            } catch (error) {
+                console.error('Error updating like:', error);
+                showToast('လိုက် အပ်ဒိတ် လုပ်ရာတွင် အမှား', 'error');
+            }
         }
 
+        // Comments Functions
         async function addComment() {
             const commentInput = document.getElementById('commentInput');
             const commentText = commentInput.value.trim();
@@ -773,7 +1356,7 @@
             }
             
             if (!currentUser) {
-                alert('Please login to add comments');
+                showToast('မှတ်ချက် ရေးရန် ကျေးဇူးပြု၍ ဝင်ရောက်ပါ', 'error');
                 openLoginModal();
                 return;
             }
@@ -786,19 +1369,26 @@
                 timestamp: new Date().toISOString()
             };
             
-            await db.collection('comments').add(comment);
-            commentInput.value = '';
-            loadComments(currentVideoData.id);
+            try {
+                await db.collection('comments').add(comment);
+                commentInput.value = '';
+                loadComments(currentVideoData.id);
+                showToast('မှတ်ချက် ရေးပြီးပါပြီ!', 'success');
+            } catch (error) {
+                console.error('Error adding comment:', error);
+                showToast('မှတ်ချက် ရေးရာတွင် အမှား: ' + error.message, 'error');
+            }
         }
 
         async function loadComments(videoId) {
             const commentsContainer = document.getElementById('commentsContainer');
-            commentsContainer.innerHTML = '<p class="text-gray-500 text-center">Loading comments...</p>';
+            commentsContainer.innerHTML = '<div class="flex items-center justify-center py-6"><div class="loading-spinner mr-2"></div>မှတ်ချက်များ ရယူနေသည်...</div>';
             
             try {
                 const querySnapshot = await db.collection('comments')
                     .where('videoId', '==', videoId)
                     .orderBy('timestamp', 'desc')
+                    .limit(20)
                     .get();
                 
                 const comments = [];
@@ -807,25 +1397,226 @@
                 });
                 
                 if (comments.length === 0) {
-                    commentsContainer.innerHTML = '<p class="text-gray-500 text-center">No comments yet</p>';
+                    commentsContainer.innerHTML = '<div class="text-center py-8 text-gray-500">မှတ်ချက် မရှိသေးပါ</div>';
                     return;
                 }
                 
                 commentsContainer.innerHTML = comments.map(comment => `
-                    <div class="bg-gray-50 p-3 rounded">
-                        <div class="flex items-center justify-between mb-1">
-                            <span class="font-medium text-sm">${comment.author}</span>
+                    <div class="bg-gray-50 p-4 rounded-lg border">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="font-semibold text-sm text-blue-600">${comment.author}</span>
                             <span class="text-xs text-gray-500">${formatDate(comment.timestamp)}</span>
                         </div>
-                        <p class="text-sm">${comment.text}</p>
+                        <p class="text-sm text-gray-700 leading-relaxed">${comment.text}</p>
                     </div>
                 `).join('');
             } catch (error) {
                 console.error('Error loading comments:', error);
-                commentsContainer.innerHTML = '<p class="text-red-500 text-center">Error loading comments</p>';
+                commentsContainer.innerHTML = '<div class="text-center py-8 text-red-500">မှတ်ချက်များ ရယူရာတွင် အမှား</div>';
             }
         }
 
+        // Search Functions
+        function performSearch() {
+            const query = elements.searchInput.value.trim().toLowerCase();
+            
+            if (query === '') {
+                displayVideos(allVideos);
+                return;
+            }
+            
+            const filteredVideos = allVideos.filter(video => 
+                video.title.toLowerCase().includes(query) ||
+                video.description.toLowerCase().includes(query) ||
+                video.tags.some(tag => tag.toLowerCase().includes(query)) ||
+                video.userDisplayName.toLowerCase().includes(query)
+            );
+            
+            displayVideos(filteredVideos);
+            
+            if (filteredVideos.length === 0) {
+                showToast(`"${query}" အတွက် ရလဒ် မတွေ့ပါ`, 'info');
+            }
+        }
+
+        // Authentication Modal Functions
+        function openLoginModal() {
+            elements.loginModal.classList.add('active');
+        }
+
+        function closeLoginModal() {
+            elements.loginModal.classList.remove('active');
+        }
+
+        function openRegisterModal() {
+            elements.registerModal.classList.add('active');
+        }
+
+        function closeRegisterModal() {
+            elements.registerModal.classList.remove('active');
+        }
+
+        function showRegister() {
+            closeLoginModal();
+            openRegisterModal();
+        }
+
+        function showLogin() {
+            closeRegisterModal();
+            openLoginModal();
+        }
+
+        async function loginUser() {
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            
+            if (!email || !password) {
+                showToast('ကျေးဇူးပြု၍ အီးမေးလ် နှင့် စကားဝှက် နှစ်ခုလုံး ရေးပါ', 'error');
+                return;
+            }
+            
+            if (!validateEmail(email)) {
+                showToast('ကျေးဇူးပြု၍ မှန်ကန်သော အီးမေးလ် လိပ်စာ ရေးပါ', 'error');
+                return;
+            }
+            
+            const loginBtn = document.getElementById('doLogin');
+            const loginText = document.getElementById('loginText');
+            const loginLoader = document.getElementById('loginLoader');
+            
+            loginBtn.disabled = true;
+            loginText.classList.add('hidden');
+            loginLoader.classList.remove('hidden');
+            
+            try {
+                await auth.signInWithEmailAndPassword(email, password);
+                closeLoginModal();
+                
+                // Clear form
+                document.getElementById('loginEmail').value = '';
+                document.getElementById('loginPassword').value = '';
+            } catch (error) {
+                console.error('Login error:', error);
+                let errorMessage = "ဝင်ရောက်ရာတွင် အမှား";
+                
+                switch(error.code) {
+                    case 'auth/invalid-email':
+                        errorMessage = "အီးမေးလ် လိပ်စာ မမှန်ကန်ပါ";
+                        break;
+                    case 'auth/user-disabled':
+                        errorMessage = "ဤအကောင့်ကို ပိတ်ထားပါသည်";
+                        break;
+                    case 'auth/user-not-found':
+                        errorMessage = "ဤအီးမေးလ် နှင့် အကောင့် မတွေ့ပါ";
+                        break;
+                    case 'auth/wrong-password':
+                        errorMessage = "စကားဝှက် မမှန်ကန်ပါ";
+                        break;
+                    case 'auth/too-many-requests':
+                        errorMessage = "ကြိုးစားမှု များလွန်းပါသည်။ ခဏနေ့ မှ ပြန်ကြိုးစားပါ";
+                        break;
+                    default:
+                        errorMessage = error.message;
+                }
+                
+                showToast(errorMessage, 'error');
+            } finally {
+                loginBtn.disabled = false;
+                loginText.classList.remove('hidden');
+                loginLoader.classList.add('hidden');
+            }
+        }
+
+        async function registerUser() {
+            const name = document.getElementById('registerName').value.trim();
+            const email = document.getElementById('registerEmail').value.trim();
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = document.getElementById('registerConfirmPassword').value;
+            const agreeTerms = document.getElementById('agreeTerms').checked;
+            
+            if (!name || !email || !password || !confirmPassword) {
+                showToast('ကျေးဇူးပြု၍ အကွက်များကို အပြည့်အစုံ ဖြည့်ပါ', 'error');
+                return;
+            }
+            
+            if (!validateEmail(email)) {
+                showToast('ကျေးဇူးပြု၍ မှန်ကန်သော အီးမေးလ် လိပ်စာ ရေးပါ', 'error');
+                return;
+            }
+            
+            if (!validatePassword(password)) {
+                showToast('စကားဝှက်သည် အနည်းဆုံး ၆ လုံး ရှိရပါမည်', 'error');
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                showToast('စကားဝှက် နှစ်ခု မတူညီပါ', 'error');
+                return;
+            }
+            
+            if (!agreeTerms) {
+                showToast('ကျေးဇူးပြု၍ အသုံးပြုမှု စည်းမျဉ်းများကို သဘောတူပါ', 'error');
+                return;
+            }
+            
+            const registerBtn = document.getElementById('doRegister');
+            const registerText = document.getElementById('registerText');
+            const registerLoader = document.getElementById('registerLoader');
+            
+            registerBtn.disabled = true;
+            registerText.classList.add('hidden');
+            registerLoader.classList.remove('hidden');
+            
+            try {
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                await userCredential.user.updateProfile({
+                    displayName: name
+                });
+                
+                // Save user data to Firestore
+                await db.collection('users').doc(userCredential.user.uid).set({
+                    name: name,
+                    email: email,
+                    joinDate: new Date().toISOString(),
+                    videosCount: 0
+                });
+                
+                closeRegisterModal();
+                showToast(`မင်္ဂလာပါ ${name}! အကောင့် အောင်မြင်စွာ ဖွင့်ပါပြီ`, 'success');
+                
+                // Clear form
+                document.getElementById('registerName').value = '';
+                document.getElementById('registerEmail').value = '';
+                document.getElementById('registerPassword').value = '';
+                document.getElementById('registerConfirmPassword').value = '';
+                document.getElementById('agreeTerms').checked = false;
+            } catch (error) {
+                console.error('Registration error:', error);
+                let errorMessage = "အကောင့် ဖွင့်ရာတွင် အမှား";
+                
+                switch(error.code) {
+                    case 'auth/email-already-in-use':
+                        errorMessage = "ဤအီးမေးလ် ကို အသုံးပြုပြီးသားပါ";
+                        break;
+                    case 'auth/invalid-email':
+                        errorMessage = "အီးမေးလ် လိပ်စာ မမှန်ကန်ပါ";
+                        break;
+                    case 'auth/weak-password':
+                        errorMessage = "စကားဝှက် ပိုခိုင်မာအောင် လုပ်ပါ";
+                        break;
+                    default:
+                        errorMessage = error.message;
+                }
+                
+                showToast(errorMessage, 'error');
+            } finally {
+                registerBtn.disabled = false;
+                registerText.classList.remove('hidden');
+                registerLoader.classList.add('hidden');
+            }
+        }
+
+        // Video Editor Functions
         function openVideoEditor() {
             if (!currentVideoData) return;
             
@@ -833,17 +1624,16 @@
             const editorVideo = document.getElementById('editorVideo');
             editorVideo.src = currentVideoData.fileUrl;
             
-            // Set up timeline
             editorVideo.addEventListener('loadedmetadata', () => {
-                document.getElementById('endTime').value = editorVideo.duration;
+                document.getElementById('endTime').value = editorVideo.duration.toFixed(1);
                 setupTimeline();
             });
             
-            editorModal.classList.add('active');
+            elements.editorModal.classList.add('active');
         }
 
         function closeVideoEditor() {
-            editorModal.classList.remove('active');
+            elements.editorModal.classList.remove('active');
             document.getElementById('editorVideo').pause();
             currentEditingVideo = null;
         }
@@ -879,7 +1669,11 @@
 
         function updateVolume() {
             const video = document.getElementById('editorVideo');
-            video.volume = document.getElementById('volumeSlider').value;
+            const volumeSlider = document.getElementById('volumeSlider');
+            const volumeValue = document.getElementById('volumeValue');
+            
+            video.volume = volumeSlider.value;
+            volumeValue.textContent = Math.round(volumeSlider.value * 100) + '%';
         }
 
         function previewEdit() {
@@ -887,16 +1681,22 @@
             const startTime = parseFloat(document.getElementById('startTime').value) || 0;
             const endTime = parseFloat(document.getElementById('endTime').value) || video.duration;
             
+            if (startTime >= endTime) {
+                showToast('စတင်ချိန် သည် ပြီးဆုံးချိန် ထက် ငယ်ရပါမည်', 'error');
+                return;
+            }
+            
             video.currentTime = startTime;
             video.play();
             
             setTimeout(() => {
                 video.pause();
+                showToast('ကြိုတင်ကြည့်ရှုမှု ပြီးပါပြီ', 'info');
             }, (endTime - startTime) * 1000);
         }
 
         function applyEdit() {
-            alert('Video editing applied! In a real application, this would process the video with the selected changes.');
+            showToast('ဗီဒီယို တည်းဖြတ်မှု အပ်လိုင် လုပ်ပါပြီ! လက်ရှိ အက်ပ်တွင် ဤလုပ်ဆောင်ချက်သည် နမူနာသာ ဖြစ်ပါသည်။', 'success');
             closeVideoEditor();
         }
 
@@ -905,13 +1705,16 @@
             video.style.filter = '';
             video.volume = 1;
             document.getElementById('volumeSlider').value = 1;
+            document.getElementById('volumeValue').textContent = '100%';
             document.getElementById('startTime').value = 0;
-            document.getElementById('endTime').value = video.duration;
+            document.getElementById('endTime').value = video.duration ? video.duration.toFixed(1) : '';
             
             document.querySelectorAll('.filter-option').forEach(option => {
                 option.classList.remove('active');
             });
             document.querySelector('.filter-option[data-filter="none"]').classList.add('active');
+            
+            showToast('တည်းဖြတ်မှုများ မူလအတိုင်း ပြန်ရောက်ပါပြီ', 'info');
         }
 
         function downloadVideo() {
@@ -920,209 +1723,237 @@
             const a = document.createElement('a');
             a.href = currentVideoData.fileUrl;
             a.download = currentVideoData.fileName;
+            a.target = '_blank';
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
+            
+            showToast('ဗီဒီယို ဒေါင်းလုဒ် စတင်ပါပြီ', 'success');
         }
 
-        async function searchVideos() {
-            const query = searchInput.value.trim();
+        function shareVideo() {
+            if (!currentVideoData) return;
             
-            if (query === '') {
-                loadVideos();
-                return;
+            if (navigator.share) {
+                navigator.share({
+                    title: currentVideoData.title,
+                    text: currentVideoData.description,
+                    url: window.location.href
+                });
+            } else {
+                // Fallback: copy URL to clipboard
+                navigator.clipboard.writeText(window.location.href).then(() => {
+                    showToast('ဗီဒီယို လင့်ခ်ကို ကော်ပီ လုပ်ပါပြီ', 'success');
+                });
+            }
+        }
+
+        // Filter and Sort Functions
+        function filterVideos() {
+            const category = document.getElementById('categoryFilter').value;
+            const sortBy = document.getElementById('sortBy').value;
+            
+            let filteredVideos = [...allVideos];
+            
+            // Apply category filter
+            if (category) {
+                filteredVideos = filteredVideos.filter(video => video.category === category);
             }
             
-            try {
-                let querySnapshot;
-                if (currentUser) {
-                    querySnapshot = await db.collection('videos')
-                        .where('userId', '==', currentUser.uid)
-                        .orderBy('title')
-                        .startAt(query)
-                        .endAt(query + '\uf8ff')
-                        .get();
-                } else {
-                    querySnapshot = await db.collection('videos')
-                        .orderBy('title')
-                        .startAt(query)
-                        .endAt(query + '\uf8ff')
-                        .get();
+            // Apply sorting
+            switch (sortBy) {
+                case 'newest':
+                    filteredVideos.sort((a, b) => new Date(b.uploadDate) - new Date(a.uploadDate));
+                    break;
+                case 'oldest':
+                    filteredVideos.sort((a, b) => new Date(a.uploadDate) - new Date(b.uploadDate));
+                    break;
+                case 'popular':
+                    filteredVideos.sort((a, b) => (b.likes || 0) - (a.likes || 0));
+                    break;
+                case 'views':
+                    filteredVideos.sort((a, b) => (b.views || 0) - (a.views || 0));
+                    break;
+            }
+            
+            displayVideos(filteredVideos);
+        }
+
+        // Event Listeners
+        elements.uploadBtn.addEventListener('click', toggleUploadSection);
+        elements.uploadArea.addEventListener('click', () => elements.videoInput.click());
+        elements.uploadArea.addEventListener('dragover', handleDragOver);
+        elements.uploadArea.addEventListener('dragleave', handleDragLeave);
+        elements.uploadArea.addEventListener('drop', handleDrop);
+        elements.videoInput.addEventListener('change', handleFileSelect);
+        document.getElementById('saveVideo').addEventListener('click', saveVideo);
+
+        // Modal events
+        document.getElementById('closeModal').addEventListener('click', closeVideoModal);
+        document.getElementById('editVideoBtn').addEventListener('click', openVideoEditor);
+        document.getElementById('downloadVideoBtn').addEventListener('click', downloadVideo);
+        document.getElementById('shareVideoBtn').addEventListener('click', shareVideo);
+        document.getElementById('likeBtn').addEventListener('click', toggleLike);
+        document.getElementById('addComment').addEventListener('click', addComment);
+
+        // Editor events
+        document.getElementById('closeEditor').addEventListener('click', closeVideoEditor);
+        document.getElementById('previewEdit').addEventListener('click', previewEdit);
+        document.getElementById('applyEdit').addEventListener('click', applyEdit);
+        document.getElementById('resetEdit').addEventListener('click', resetEdit);
+        document.getElementById('volumeSlider').addEventListener('input', updateVolume);
+
+        // Filter events
+        document.querySelectorAll('.filter-option').forEach(option => {
+            option.addEventListener('click', selectFilter);
+        });
+
+        // Search events
+        elements.searchInput.addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                performSearch();
+            }, 300);
+        });
+
+        // Filter and sort events
+        document.getElementById('categoryFilter').addEventListener('change', filterVideos);
+        document.getElementById('sortBy').addEventListener('change', filterVideos);
+
+        // Auth events
+        elements.loginBtn.addEventListener('click', () => {
+            if (currentUser) {
+                auth.signOut();
+            } else {
+                openLoginModal();
+            }
+        });
+
+        document.getElementById('closeLoginModal').addEventListener('click', closeLoginModal);
+        document.getElementById('closeRegisterModal').addEventListener('click', closeRegisterModal);
+        document.getElementById('doLogin').addEventListener('click', loginUser);
+        document.getElementById('doRegister').addEventListener('click', registerUser);
+        document.getElementById('showRegister').addEventListener('click', showRegister);
+        document.getElementById('showLogin').addEventListener('click', showLogin);
+
+        // Password toggle events
+        document.getElementById('toggleLoginPassword').addEventListener('click', function() {
+            const passwordInput = document.getElementById('loginPassword');
+            const icon = this.querySelector('i');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        });
+
+        document.getElementById('toggleRegisterPassword').addEventListener('click', function() {
+            const passwordInput = document.getElementById('registerPassword');
+            const icon = this.querySelector('i');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        });
+
+        document.getElementById('toggleConfirmPassword').addEventListener('click', function() {
+            const passwordInput = document.getElementById('registerConfirmPassword');
+            const icon = this.querySelector('i');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        });
+
+        // Comment input enter key
+        document.getElementById('commentInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                addComment();
+            }
+        });
+
+        // Modal click outside to close
+        [elements.videoModal, elements.editorModal, elements.loginModal, elements.registerModal].forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.remove('active');
+                    if (modal === elements.videoModal && document.getElementById('modalVideo')) {
+                        document.getElementById('modalVideo').pause();
+                    }
+                    if (modal === elements.editorModal && document.getElementById('editorVideo')) {
+                        document.getElementById('editorVideo').pause();
+                    }
                 }
-                
-                const videos = [];
-                querySnapshot.forEach(doc => {
-                    videos.push({
-                        id: doc.id,
-                        ...doc.data()
-                    });
-                });
-                
-                displayVideos(videos);
-            } catch (error) {
-                console.error('Error searching videos:', error);
-            }
-        }
-
-        // Authentication functions
-        function openLoginModal() {
-            loginModal.classList.add('active');
-        }
-
-        function closeLoginModal() {
-            loginModal.classList.remove('active');
-        }
-
-        function openRegisterModal() {
-            registerModal.classList.add('active');
-        }
-
-        function closeRegisterModal() {
-            registerModal.classList.remove('active');
-        }
-
-        function showRegister() {
-            closeLoginModal();
-            openRegisterModal();
-        }
-
-        function showLogin() {
-            closeRegisterModal();
-            openLoginModal();
-        }
-
-        async function loginUser() {
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
-            
-            if (!email || !password) {
-                alert('Please enter both email and password');
-                return;
-            }
-            
-            try {
-                await auth.signInWithEmailAndPassword(email, password);
-                closeLoginModal();
-                loadVideos();
-            } catch (error) {
-                console.error('Login error:', error);
-                alert('Login failed: ' + error.message);
-            }
-        }
-
-        async function registerUser() {
-            const name = document.getElementById('registerName').value;
-            const email = document.getElementById('registerEmail').value;
-            const password = document.getElementById('registerPassword').value;
-            const confirmPassword = document.getElementById('registerConfirmPassword').value;
-            
-            if (!name || !email || !password || !confirmPassword) {
-                alert('Please fill in all fields');
-                return;
-            }
-            
-            if (password !== confirmPassword) {
-                alert('Passwords do not match');
-                return;
-            }
-            
-            try {
-                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-                await userCredential.user.updateProfile({
-                    displayName: name
-                });
-                closeRegisterModal();
-                loadVideos();
-            } catch (error) {
-                console.error('Registration error:', error);
-                alert('Registration failed: ' + error.message);
-            }
-        }
-
-        // Utility functions
-        function formatFileSize(bytes) {
-            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-            if (bytes === 0) return '0 Bytes';
-            const i = Math.floor(Math.log(bytes) / Math.log(1024));
-            return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
-        }
-
-        function formatDate(dateString) {
-            const date = new Date(dateString);
-            const now = new Date();
-            const diffTime = Math.abs(now - date);
-            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-            
-            if (diffDays === 0) return 'Today';
-            if (diffDays === 1) return '1 day ago';
-            if (diffDays < 7) return `${diffDays} days ago`;
-            if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
-            if (diffDays < 365) return `${Math.floor(diffDays / 30)} months ago`;
-            return `${Math.floor(diffDays / 365)} years ago`;
-        }
-
-        // Initialize app
-        window.addEventListener('load', () => {
-            // Check if Firebase is already initialized
-            if (!firebase.apps.length) {
-                firebase.initializeApp(firebaseConfig);
-            }
-            
-            // Load videos if user is already logged in
-            if (auth.currentUser) {
-                currentUser = auth.currentUser;
-                updateUI();
-                loadVideos();
-            }
-        });
-
-        // Handle modal clicks
-        videoModal.addEventListener('click', (e) => {
-            if (e.target === videoModal) {
-                closeVideoModal();
-            }
-        });
-
-        editorModal.addEventListener('click', (e) => {
-            if (e.target === editorModal) {
-                closeVideoEditor();
-            }
-        });
-
-        loginModal.addEventListener('click', (e) => {
-            if (e.target === loginModal) {
-                closeLoginModal();
-            }
-        });
-
-        registerModal.addEventListener('click', (e) => {
-            if (e.target === registerModal) {
-                closeRegisterModal();
-            }
+            });
         });
 
         // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
-                if (videoModal.classList.contains('active')) {
-                    closeVideoModal();
+                document.querySelectorAll('.modal.active').forEach(modal => {
+                    modal.classList.remove('active');
+                });
+                
+                if (document.getElementById('modalVideo')) {
+                    document.getElementById('modalVideo').pause();
                 }
-                if (editorModal.classList.contains('active')) {
-                    closeVideoEditor();
-                }
-                if (loginModal.classList.contains('active')) {
-                    closeLoginModal();
-                }
-                if (registerModal.classList.contains('active')) {
-                    closeRegisterModal();
+                if (document.getElementById('editorVideo')) {
+                    document.getElementById('editorVideo').pause();
                 }
             }
+            
+            // Search shortcut
+            if (e.ctrlKey && e.key === 'k') {
+                e.preventDefault();
+                elements.searchInput.focus();
+            }
         });
+
+        // Initialize app
+        window.addEventListener('load', () => {
+            // Initialize Firebase if not already done
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+            
+            // Show welcome message
+            showToast('VideoHub သို့ ကြိုဆိုပါသည်!', 'info');
+            
+            // Load initial data
+            loadVideos();
+            updateStats();
+        });
+
+        // Service Worker for offline support (optional)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        console.log('SW registered: ', registration);
+                    })
+                    .catch(registrationError => {
+                        console.log('SW registration failed: ', registrationError);
+                    });
+            });
+        }
     </script>
-    <!-- Add Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
 </body>
 </html>
