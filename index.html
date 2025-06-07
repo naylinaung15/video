@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VideoHub - Complete Video Platform</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <style>
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .video-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: transform 0.2s;
+        }
+        .video-card:hover {
+            transform: translateY(-2px);
+        }
+        .upload-area {
+            border: 2px dashed #cbd5e0;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+        .upload-area:hover {
+            border-color: #4299e1;
+        }
+        .upload-area.dragover {
+            border-color: #3182ce;
+            background-color: #ebf8ff;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+        }
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .video-editor {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            max-width: 800px;
+            width: 90%;
+            max-height: 90%;
+            overflow-y: auto;
+        }
+        .timeline {
+            background: #f7fafc;
+            height: 60px;
+            border-radius: 6px;
+            position: relative;
+            margin: 20px 0;
+        }
+        .progress-bar {
+            height: 4px;
+            background: #4299e1;
+            border-radius: 2px;
+            transition: width 0.1s;
+        }
+        .filter-preview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .filter-option {
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+        }
+        .filter-option.active {
+            border-color: #4299e1;
+            background: #ebf8ff;
+        }
+        .comment-thread {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .like-animation {
+            animation: likeHeartBeat 0.6s ease-in-out;
+        }
+        @keyframes likeHeartBeat {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <!-- Header -->
+    <header class="bg-white shadow-md">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <h1 class="text-2xl font-bold text-blue-600">
+                        <i class="fas fa-video mr-2"></i>VideoHub
+                    </h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="relative">
+                        <input type="text" id="searchInput" placeholder="Search videos..." 
+                               class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                    </div>
+                    <button id="uploadBtn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+                        <i class="fas fa-upload mr-2"></i>Upload
+                    </button>
+                    <button id="loginBtn" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
+                        <i class="fas fa-sign-in-alt mr-2"></i>Login
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Upload Section -->
+        <div id="uploadSection" class="mb-8 hidden">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold mb-4">Upload Video</h2>
+                <div class="upload-area" id="uploadArea">
+                    <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
+                    <p class="text-gray-600 mb-2">Drag and drop your video here or click to browse</p>
+                    <p class="text-sm text-gray-400">Supports MP4, MOV, AVI files</p>
+                    <input type="file" id="videoInput" accept="video/*" class="hidden">
+                </div>
+                <div id="uploadProgress" class="mt-4 hidden">
+                    <div class="bg-gray-200 rounded-full h-2">
+                        <div class="progress-bar"></div>
+                    </div>
+                </div>
+                <div id="videoDetails" class="mt-4 hidden">
+                    <input type="text" id="videoTitle" placeholder="Video Title" class="w-full p-2 border border-gray-300 rounded mb-2">
+                    <textarea id="videoDescription" placeholder="Video Description" class="w-full p-2 border border-gray-300 rounded mb-2" rows="3"></textarea>
+                    <input type="text" id="videoTags" placeholder="Tags (comma separated)" class="w-full p-2 border border-gray-300 rounded mb-2">
+                    <button id="saveVideo" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+                        <i class="fas fa-save mr-2"></i>Save Video
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Video Grid -->
+        <div id="videoGrid" class="video-grid">
+            <!-- Videos will be dynamically loaded here -->
+        </div>
+
+        <!-- No Videos Message -->
+        <div id="noVideos" class="text-center py-12">
+            <i class="fas fa-video-slash text-6xl text-gray-300 mb-4"></i>
+            <h3 class="text-xl text-gray-500 mb-2">No videos yet</h3>
+            <p class="text-gray-400">Upload your first video to get started!</p>
+        </div>
+    </main>
+
+    <!-- Video Player Modal -->
+    <div id="videoModal" class="modal">
+        <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 overflow-hidden">
+            <div class="flex justify-between items-center p-4 border-b">
+                <h3 id="modalVideoTitle" class="text-lg font-semibold"></h3>
+                <div class="flex space-x-2">
+                    <button id="editVideoBtn" class="text-blue-600 hover:text-blue-800">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button id="downloadVideoBtn" class="text-green-600 hover:text-green-800">
+                        <i class="fas fa-download"></i>
+                    </button>
+                    <button id="closeModal" class="text-gray-600 hover:text-gray-800">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="p-4">
+                <video id="modalVideo" controls playsinline webkit-playsinline class="w-full rounded-lg mb-4">
+                </video>
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center space-x-4">
+                        <button id="likeBtn" class="flex items-center space-x-1 text-gray-600 hover:text-red-500">
+                            <i class="far fa-heart"></i>
+                            <span id="likeCount">0</span>
+                        </button>
+                        <span id="viewCount" class="text-gray-500">0 views</span>
+                    </div>
+                    <span id="uploadDate" class="text-gray-500"></span>
+                </div>
+                <p id="modalVideoDescription" class="text-gray-700 mb-4"></p>
+                <div id="modalVideoTags" class="mb-4"></div>
+                
+                <!-- Comments Section -->
+                <div class="border-t pt-4">
+                    <h4 class="font-semibold mb-2">Comments</h4>
+                    <div class="flex mb-4">
+                        <input type="text" id="commentInput" placeholder="Add a comment..." 
+                               class="flex-1 p-2 border border-gray-300 rounded-l">
+                        <button id="addComment" class="bg-blue-600 text-white px-4 py-2 rounded-r hover:bg-blue-700">
+                            Post
+                        </button>
+                    </div>
+                    <div id="commentsContainer" class="comment-thread space-y-3">
+                        <!-- Comments will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Video Editor Modal -->
+    <div id="editorModal" class="modal">
+        <div class="video-editor">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold">Video Editor</h3>
+                <button id="closeEditor" class="text-gray-600 hover:text-gray-800">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <video id="editorVideo" controls playsinline webkit-playsinline class="w-full rounded-lg mb-4">
+            </video>
+            
+            <!-- Timeline -->
+            <div class="timeline" id="timeline">
+                <div class="absolute top-0 left-0 w-1 h-full bg-red-500" id="playhead" style="left: 0%;"></div>
+            </div>
+            
+            <!-- Controls -->
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm font-medium mb-1">Start Time (seconds)</label>
+                    <input type="number" id="startTime" min="0" step="0.1" class="w-full p-2 border border-gray-300 rounded">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">End Time (seconds)</label>
+                    <input type="number" id="endTime" min="0" step="0.1" class="w-full p-2 border border-gray-300 rounded">
+                </div>
+            </div>
+            
+            <!-- Filters -->
+            <div class="mb-4">
+                <label class="block text-sm font-medium mb-2">Filters</label>
+                <div class="filter-preview">
+                    <div class="filter-option active" data-filter="none">
+                        <div class="w-full h-16 bg-gray-200 rounded mb-1"></div>
+                        <span class="text-xs">None</span>
+                    </div>
+                    <div class="filter-option" data-filter="grayscale(100%)">
+                        <div class="w-full h-16 bg-gray-400 rounded mb-1"></div>
+                        <span class="text-xs">B&W</span>
+                    </div>
+                    <div class="filter-option" data-filter="sepia(100%)">
+                        <div class="w-full h-16 bg-yellow-200 rounded mb-1"></div>
+                        <span class="text-xs">Sepia</span>
+                    </div>
+                    <div class="filter-option" data-filter="contrast(150%)">
+                        <div class="w-full h-16 bg-gray-800 rounded mb-1"></div>
+                        <span class="text-xs">High Contrast</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Volume Control -->
+            <div class="mb-4">
+                <label class="block text-sm font-medium mb-1">Volume</label>
+                <input type="range" id="volumeSlider" min="0" max="1" step="0.1" value="1" class="w-full">
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="flex space-x-2">
+                <button id="previewEdit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                    <i class="fas fa-play mr-2"></i>Preview
+                </button>
+                <button id="applyEdit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+                    <i class="fas fa-check mr-2"></i>Apply Changes
+                </button>
+                <button id="resetEdit" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">
+                    <i class="fas fa-undo mr-2"></i>Reset
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold">Login to VideoHub</h3>
+                <button id="closeLoginModal" class="text-gray-600 hover:text-gray-800">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium mb-1">Email</label>
+                    <input type="email" id="loginEmail" class="w-full p-2 border border-gray-300 rounded">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Password</label>
+                    <input type="password" id="loginPassword" class="w-full p-2 border border-gray-300 rounded">
+                </div>
+                <button id="doLogin" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
+                    Login
+                </button>
+                <p class="text-center text-sm text-gray-600">
+                    Don't have an account? <span id="showRegister" class="text-blue-600 cursor-pointer">Register</span>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div id="registerModal" class="modal">
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold">Create an Account</h3>
+                <button id="closeRegisterModal" class="text-gray-600 hover:text-gray-800">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium mb-1">Name</label>
+                    <input type="text" id="registerName" class="w-full p-2 border border-gray-300 rounded">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Email</label>
+                    <input type="email" id="registerEmail" class="w-full p-2 border border-gray-300 rounded">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Password</label>
+                    <input type="password" id="registerPassword" class="w-full p-2 border border-gray-300 rounded">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Confirm Password</label>
+                    <input type="password" id="registerConfirmPassword" class="w-full p-2 border border-gray-300 rounded">
+                </div>
+                <button id="doRegister" class="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700">
+                    Register
+                </button>
+                <p class="text-center text-sm text-gray-600">
+                    Already have an account? <span id="showLogin" class="text-blue-600 cursor-pointer">Login</span>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Firebase configuration (replace with your own)
+        const firebaseConfig = {
+            apiKey: "AIzaSyDEXAMPLEEXAMPLEEXAMPLEEXAMPLE",
+            authDomain: "your-app.firebaseapp.com",
+            projectId: "your-app",
+            storageBucket: "your-app.appspot.com",
+            messagingSenderId: "1234567890",
+            appId: "1:1234567890:web:abcdef1234567890"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const storage = firebase.storage();
+        const auth = firebase.auth();
+
+        // Current user state
+        let currentUser = null;
+        let currentVideoFile = null;
+        let currentVideoData = null;
+        let currentEditingVideo = null;
+
+        // DOM elements
+        const uploadBtn = document.getElementById('uploadBtn');
+        const uploadSection = document.getElementById('uploadSection');
+        const uploadArea = document.getElementById('uploadArea');
+        const videoInput = document.getElementById('videoInput');
+        const uploadProgress = document.getElementById('uploadProgress');
+        const videoDetails = document.getElementById('videoDetails');
+        const videoGrid = document.getElementById('videoGrid');
+        const noVideos = document.getElementById('noVideos');
+        const searchInput = document.getElementById('searchInput');
+        const videoModal = document.getElementById('videoModal');
+        const editorModal = document.getElementById('editorModal');
+        const loginModal = document.getElementById('loginModal');
+        const registerModal = document.getElementById('registerModal');
+        const loginBtn = document.getElementById('loginBtn');
+
+        // Event listeners
+        uploadBtn.addEventListener('click', toggleUploadSection);
+        uploadArea.addEventListener('click', () => videoInput.click());
+        uploadArea.addEventListener('dragover', handleDragOver);
+        uploadArea.addEventListener('drop', handleDrop);
+        videoInput.addEventListener('change', handleFileSelect);
+        document.getElementById('saveVideo').addEventListener('click', saveVideo);
+        document.getElementById('closeModal').addEventListener('click', closeVideoModal);
+        document.getElementById('editVideoBtn').addEventListener('click', openVideoEditor);
+        document.getElementById('downloadVideoBtn').addEventListener('click', downloadVideo);
+        document.getElementById('likeBtn').addEventListener('click', toggleLike);
+        document.getElementById('addComment').addEventListener('click', addComment);
+        document.getElementById('closeEditor').addEventListener('click', closeVideoEditor);
+        searchInput.addEventListener('input', searchVideos);
+        loginBtn.addEventListener('click', openLoginModal);
+        document.getElementById('closeLoginModal').addEventListener('click', closeLoginModal);
+        document.getElementById('closeRegisterModal').addEventListener('click', closeRegisterModal);
+        document.getElementById('doLogin').addEventListener('click', loginUser);
+        document.getElementById('doRegister').addEventListener('click', registerUser);
+        document.getElementById('showRegister').addEventListener('click', showRegister);
+        document.getElementById('showLogin').addEventListener('click', showLogin);
+
+        // Video editor event listeners
+        document.getElementById('previewEdit').addEventListener('click', previewEdit);
+        document.getElementById('applyEdit').addEventListener('click', applyEdit);
+        document.getElementById('resetEdit').addEventListener('click', resetEdit);
+        document.getElementById('volumeSlider').addEventListener('input', updateVolume);
+
+        // Filter selection
+        document.querySelectorAll('.filter-option').forEach(option => {
+            option.addEventListener('click', selectFilter);
+        });
+
+        // Authentication state observer
+        auth.onAuthStateChanged(user => {
+            currentUser = user;
+            updateUI();
+            loadVideos();
+        });
+
+        function updateUI() {
+            if (currentUser) {
+                loginBtn.innerHTML = `<i class="fas fa-user mr-2"></i>${currentUser.displayName || currentUser.email}`;
+                uploadBtn.disabled = false;
+            } else {
+                loginBtn.innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i>Login';
+                uploadBtn.disabled = true;
+            }
+        }
+
+        function toggleUploadSection() {
+            if (!currentUser) {
+                alert('Please login to upload videos');
+                openLoginModal();
+                return;
+            }
+            
+            const isHidden = uploadSection.classList.contains('hidden');
+            uploadSection.classList.toggle('hidden', !isHidden);
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0 && files[0].type.startsWith('video/')) {
+                processVideoFile(files[0]);
+            }
+        }
+
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (file && file.type.startsWith('video/')) {
+                processVideoFile(file);
+            }
+        }
+
+        function processVideoFile(file) {
+            currentVideoFile = file;
+            showUploadProgress();
+            
+            // Simulate upload progress
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 20;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(interval);
+                    showVideoDetails();
+                }
+                updateProgressBar(progress);
+            }, 200);
+        }
+
+        function showUploadProgress() {
+            uploadProgress.classList.remove('hidden');
+            videoDetails.classList.add('hidden');
+        }
+
+        function updateProgressBar(progress) {
+            const progressBar = document.querySelector('.progress-bar');
+            progressBar.style.width = progress + '%';
+        }
+
+        function showVideoDetails() {
+            uploadProgress.classList.add('hidden');
+            videoDetails.classList.remove('hidden');
+            document.getElementById('videoTitle').value = currentVideoFile.name.replace(/\.[^/.]+$/, "");
+        }
+
+        async function saveVideo() {
+            if (!currentUser) {
+                alert('Please login to save videos');
+                return;
+            }
+            
+            const title = document.getElementById('videoTitle').value;
+            const description = document.getElementById('videoDescription').value;
+            const tags = document.getElementById('videoTags').value.split(',').map(tag => tag.trim()).filter(tag => tag);
+            
+            if (!title) {
+                alert('Please enter a video title');
+                return;
+            }
+
+            try {
+                // Upload video to Firebase Storage
+                const storageRef = storage.ref();
+                const videoRef = storageRef.child(`videos/${currentUser.uid}/${Date.now()}_${currentVideoFile.name}`);
+                const uploadTask = videoRef.put(currentVideoFile);
+                
+                uploadTask.on('state_changed', 
+                    (snapshot) => {
+                        // Progress tracking
+                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                        updateProgressBar(progress);
+                    },
+                    (error) => {
+                        console.error('Upload error:', error);
+                        alert('Error uploading video');
+                    },
+                    async () => {
+                        // Upload complete
+                        const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
+                        
+                        // Save video data to Firestore
+                        const videoData = {
+                            title,
+                            description,
+                            tags,
+                            uploadDate: new Date().toISOString(),
+                            fileUrl: downloadURL,
+                            fileName: currentVideoFile.name,
+                            fileSize: currentVideoFile.size,
+                            duration: 0, // Would calculate this in a real app
+                            views: 0,
+                            likes: 0,
+                            likesBy: [],
+                            userId: currentUser.uid,
+                            userDisplayName: currentUser.displayName || currentUser.email
+                        };
+                        
+                        await db.collection('videos').add(videoData);
+                        alert('Video uploaded successfully!');
+                        resetUploadForm();
+                        loadVideos();
+                    }
+                );
+            } catch (error) {
+                console.error('Error saving video:', error);
+                alert('Error uploading video');
+            }
+        }
+
+        function resetUploadForm() {
+            document.getElementById('videoTitle').value = '';
+            document.getElementById('videoDescription').value = '';
+            document.getElementById('videoTags').value = '';
+            videoDetails.classList.add('hidden');
+            uploadSection.classList.add('hidden');
+            currentVideoFile = null;
+        }
+
+        async function loadVideos() {
+            try {
+                let videos = [];
+                let querySnapshot;
+                
+                if (currentUser) {
+                    // Load user's videos if logged in
+                    querySnapshot = await db.collection('videos')
+                        .where('userId', '==', currentUser.uid)
+                        .orderBy('uploadDate', 'desc')
+                        .get();
+                } else {
+                    // Load public videos
+                    querySnapshot = await db.collection('videos')
+                        .orderBy('uploadDate', 'desc')
+                        .limit(20)
+                        .get();
+                }
+                
+                querySnapshot.forEach(doc => {
+                    videos.push({
+                        id: doc.id,
+                        ...doc.data()
+                    });
+                });
+                
+                displayVideos(videos);
+            } catch (error) {
+                console.error('Error loading videos:', error);
+            }
+        }
+
+        function displayVideos(videos) {
+            videoGrid.innerHTML = '';
+            
+            if (videos.length === 0) {
+                noVideos.classList.remove('hidden');
+                return;
+            }
+            
+            noVideos.classList.add('hidden');
+            
+            videos.forEach(video => {
+                const videoCard = createVideoCard(video);
+                videoGrid.appendChild(videoCard);
+            });
+        }
+
+        function createVideoCard(video) {
+            const card = document.createElement('div');
+            card.className = 'video-card cursor-pointer';
+            card.onclick = () => openVideoModal(video);
+            
+            card.innerHTML = `
+                <div class="relative">
+                    <video class="w-full h-48 object-cover" preload="metadata">
+                        <source src="${video.fileUrl}" type="video/mp4">
+                    </video>
+                    <div class="absolute bottom-2 right-2 bg-black bg-opacity-75 text-white px-2 py-1 rounded text-xs">
+                        ${formatFileSize(video.fileSize)}
+                    </div>
+                </div>
+                <div class="p-4">
+                    <h3 class="font-semibold text-lg mb-2 line-clamp-2">${video.title}</h3>
+                    <p class="text-gray-600 text-sm mb-2 line-clamp-2">${video.description}</p>
+                    <div class="flex items-center justify-between text-sm text-gray-500">
+                        <span><i class="fas fa-eye mr-1"></i>${video.views}</span>
+                        <span><i class="fas fa-heart mr-1"></i>${video.likes}</span>
+                        <span>${formatDate(video.uploadDate)}</span>
+                    </div>
+                    <div class="mt-2">
+                        ${video.tags.map(tag => `<span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mr-1">${tag}</span>`).join('')}
+                    </div>
+                </div>
+            `;
+            
+            return card;
+        }
+
+        async function openVideoModal(video) {
+            currentVideoData = video;
+            
+            // Update view count
+            await db.collection('videos').doc(video.id).update({
+                views: firebase.firestore.FieldValue.increment(1)
+            });
+            currentVideoData.views += 1;
+            
+            // Populate modal
+            document.getElementById('modalVideoTitle').textContent = video.title;
+            document.getElementById('modalVideoDescription').textContent = video.description;
+            document.getElementById('modalVideo').src = video.fileUrl;
+            document.getElementById('likeCount').textContent = video.likes;
+            document.getElementById('viewCount').textContent = `${video.views + 1} views`;
+            document.getElementById('uploadDate').textContent = formatDate(video.uploadDate);
+            
+            // Update like button state
+            const likeBtn = document.getElementById('likeBtn');
+            const icon = likeBtn.querySelector('i');
+            if (currentUser && video.likesBy && video.likesBy.includes(currentUser.uid)) {
+                icon.classList.add('fas');
+                icon.classList.remove('far');
+            } else {
+                icon.classList.add('far');
+                icon.classList.remove('fas');
+            }
+            
+            // Update tags
+            const tagsContainer = document.getElementById('modalVideoTags');
+            tagsContainer.innerHTML = video.tags.map(tag => 
+                `<span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mr-1">${tag}</span>`
+            ).join('');
+            
+            // Load comments
+            loadComments(video.id);
+            
+            videoModal.classList.add('active');
+        }
+
+        function closeVideoModal() {
+            videoModal.classList.remove('active');
+            document.getElementById('modalVideo').pause();
+            currentVideoData = null;
+        }
+
+        async function toggleLike() {
+            if (!currentVideoData || !currentUser) {
+                alert('Please login to like videos');
+                openLoginModal();
+                return;
+            }
+            
+            const likeBtn = document.getElementById('likeBtn');
+            const likeCount = document.getElementById('likeCount');
+            const icon = likeBtn.querySelector('i');
+            
+            const isLiked = icon.classList.contains('fas');
+            let newLikes = currentVideoData.likes;
+            let likesBy = currentVideoData.likesBy || [];
+            
+            if (isLiked) {
+                // Unlike
+                newLikes--;
+                likesBy = likesBy.filter(id => id !== currentUser.uid);
+            } else {
+                // Like
+                newLikes++;
+                likesBy.push(currentUser.uid);
+            }
+            
+            // Update UI
+            icon.classList.toggle('fas', !isLiked);
+            icon.classList.toggle('far', isLiked);
+            likeCount.textContent = newLikes;
+            likeBtn.classList.add('like-animation');
+            
+            setTimeout(() => {
+                likeBtn.classList.remove('like-animation');
+            }, 600);
+            
+            // Update database
+            await db.collection('videos').doc(currentVideoData.id).update({
+                likes: newLikes,
+                likesBy: likesBy
+            });
+            
+            currentVideoData.likes = newLikes;
+            currentVideoData.likesBy = likesBy;
+            
+            // Refresh video grid
+            loadVideos();
+        }
+
+        async function addComment() {
+            const commentInput = document.getElementById('commentInput');
+            const commentText = commentInput.value.trim();
+            
+            if (!commentText || !currentVideoData) {
+                return;
+            }
+            
+            if (!currentUser) {
+                alert('Please login to add comments');
+                openLoginModal();
+                return;
+            }
+            
+            const comment = {
+                videoId: currentVideoData.id,
+                text: commentText,
+                author: currentUser.displayName || currentUser.email,
+                userId: currentUser.uid,
+                timestamp: new Date().toISOString()
+            };
+            
+            await db.collection('comments').add(comment);
+            commentInput.value = '';
+            loadComments(currentVideoData.id);
+        }
+
+        async function loadComments(videoId) {
+            const commentsContainer = document.getElementById('commentsContainer');
+            commentsContainer.innerHTML = '<p class="text-gray-500 text-center">Loading comments...</p>';
+            
+            try {
+                const querySnapshot = await db.collection('comments')
+                    .where('videoId', '==', videoId)
+                    .orderBy('timestamp', 'desc')
+                    .get();
+                
+                const comments = [];
+                querySnapshot.forEach(doc => {
+                    comments.push(doc.data());
+                });
+                
+                if (comments.length === 0) {
+                    commentsContainer.innerHTML = '<p class="text-gray-500 text-center">No comments yet</p>';
+                    return;
+                }
+                
+                commentsContainer.innerHTML = comments.map(comment => `
+                    <div class="bg-gray-50 p-3 rounded">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="font-medium text-sm">${comment.author}</span>
+                            <span class="text-xs text-gray-500">${formatDate(comment.timestamp)}</span>
+                        </div>
+                        <p class="text-sm">${comment.text}</p>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading comments:', error);
+                commentsContainer.innerHTML = '<p class="text-red-500 text-center">Error loading comments</p>';
+            }
+        }
+
+        function openVideoEditor() {
+            if (!currentVideoData) return;
+            
+            currentEditingVideo = { ...currentVideoData };
+            const editorVideo = document.getElementById('editorVideo');
+            editorVideo.src = currentVideoData.fileUrl;
+            
+            // Set up timeline
+            editorVideo.addEventListener('loadedmetadata', () => {
+                document.getElementById('endTime').value = editorVideo.duration;
+                setupTimeline();
+            });
+            
+            editorModal.classList.add('active');
+        }
+
+        function closeVideoEditor() {
+            editorModal.classList.remove('active');
+            document.getElementById('editorVideo').pause();
+            currentEditingVideo = null;
+        }
+
+        function setupTimeline() {
+            const video = document.getElementById('editorVideo');
+            const timeline = document.getElementById('timeline');
+            const playhead = document.getElementById('playhead');
+            
+            video.addEventListener('timeupdate', () => {
+                const progress = (video.currentTime / video.duration) * 100;
+                playhead.style.left = progress + '%';
+            });
+            
+            timeline.addEventListener('click', (e) => {
+                const rect = timeline.getBoundingClientRect();
+                const clickX = e.clientX - rect.left;
+                const percentage = clickX / rect.width;
+                video.currentTime = percentage * video.duration;
+            });
+        }
+
+        function selectFilter(e) {
+            document.querySelectorAll('.filter-option').forEach(option => {
+                option.classList.remove('active');
+            });
+            e.currentTarget.classList.add('active');
+            
+            const filter = e.currentTarget.dataset.filter;
+            const video = document.getElementById('editorVideo');
+            video.style.filter = filter === 'none' ? '' : filter;
+        }
+
+        function updateVolume() {
+            const video = document.getElementById('editorVideo');
+            video.volume = document.getElementById('volumeSlider').value;
+        }
+
+        function previewEdit() {
+            const video = document.getElementById('editorVideo');
+            const startTime = parseFloat(document.getElementById('startTime').value) || 0;
+            const endTime = parseFloat(document.getElementById('endTime').value) || video.duration;
+            
+            video.currentTime = startTime;
+            video.play();
+            
+            setTimeout(() => {
+                video.pause();
+            }, (endTime - startTime) * 1000);
+        }
+
+        function applyEdit() {
+            alert('Video editing applied! In a real application, this would process the video with the selected changes.');
+            closeVideoEditor();
+        }
+
+        function resetEdit() {
+            const video = document.getElementById('editorVideo');
+            video.style.filter = '';
+            video.volume = 1;
+            document.getElementById('volumeSlider').value = 1;
+            document.getElementById('startTime').value = 0;
+            document.getElementById('endTime').value = video.duration;
+            
+            document.querySelectorAll('.filter-option').forEach(option => {
+                option.classList.remove('active');
+            });
+            document.querySelector('.filter-option[data-filter="none"]').classList.add('active');
+        }
+
+        function downloadVideo() {
+            if (!currentVideoData) return;
+            
+            const a = document.createElement('a');
+            a.href = currentVideoData.fileUrl;
+            a.download = currentVideoData.fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        async function searchVideos() {
+            const query = searchInput.value.trim();
+            
+            if (query === '') {
+                loadVideos();
+                return;
+            }
+            
+            try {
+                let querySnapshot;
+                if (currentUser) {
+                    querySnapshot = await db.collection('videos')
+                        .where('userId', '==', currentUser.uid)
+                        .orderBy('title')
+                        .startAt(query)
+                        .endAt(query + '\uf8ff')
+                        .get();
+                } else {
+                    querySnapshot = await db.collection('videos')
+                        .orderBy('title')
+                        .startAt(query)
+                        .endAt(query + '\uf8ff')
+                        .get();
+                }
+                
+                const videos = [];
+                querySnapshot.forEach(doc => {
+                    videos.push({
+                        id: doc.id,
+                        ...doc.data()
+                    });
+                });
+                
+                displayVideos(videos);
+            } catch (error) {
+                console.error('Error searching videos:', error);
+            }
+        }
+
+        // Authentication functions
+        function openLoginModal() {
+            loginModal.classList.add('active');
+        }
+
+        function closeLoginModal() {
+            loginModal.classList.remove('active');
+        }
+
+        function openRegisterModal() {
+            registerModal.classList.add('active');
+        }
+
+        function closeRegisterModal() {
+            registerModal.classList.remove('active');
+        }
+
+        function showRegister() {
+            closeLoginModal();
+            openRegisterModal();
+        }
+
+        function showLogin() {
+            closeRegisterModal();
+            openLoginModal();
+        }
+
+        async function loginUser() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            if (!email || !password) {
+                alert('Please enter both email and password');
+                return;
+            }
+            
+            try {
+                await auth.signInWithEmailAndPassword(email, password);
+                closeLoginModal();
+                loadVideos();
+            } catch (error) {
+                console.error('Login error:', error);
+                alert('Login failed: ' + error.message);
+            }
+        }
+
+        async function registerUser() {
+            const name = document.getElementById('registerName').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = document.getElementById('registerConfirmPassword').value;
+            
+            if (!name || !email || !password || !confirmPassword) {
+                alert('Please fill in all fields');
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                alert('Passwords do not match');
+                return;
+            }
+            
+            try {
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                await userCredential.user.updateProfile({
+                    displayName: name
+                });
+                closeRegisterModal();
+                loadVideos();
+            } catch (error) {
+                console.error('Registration error:', error);
+                alert('Registration failed: ' + error.message);
+            }
+        }
+
+        // Utility functions
+        function formatFileSize(bytes) {
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            if (bytes === 0) return '0 Bytes';
+            const i = Math.floor(Math.log(bytes) / Math.log(1024));
+            return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffTime = Math.abs(now - date);
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            
+            if (diffDays === 0) return 'Today';
+            if (diffDays === 1) return '1 day ago';
+            if (diffDays < 7) return `${diffDays} days ago`;
+            if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+            if (diffDays < 365) return `${Math.floor(diffDays / 30)} months ago`;
+            return `${Math.floor(diffDays / 365)} years ago`;
+        }
+
+        // Initialize app
+        window.addEventListener('load', () => {
+            // Check if Firebase is already initialized
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+            
+            // Load videos if user is already logged in
+            if (auth.currentUser) {
+                currentUser = auth.currentUser;
+                updateUI();
+                loadVideos();
+            }
+        });
+
+        // Handle modal clicks
+        videoModal.addEventListener('click', (e) => {
+            if (e.target === videoModal) {
+                closeVideoModal();
+            }
+        });
+
+        editorModal.addEventListener('click', (e) => {
+            if (e.target === editorModal) {
+                closeVideoEditor();
+            }
+        });
+
+        loginModal.addEventListener('click', (e) => {
+            if (e.target === loginModal) {
+                closeLoginModal();
+            }
+        });
+
+        registerModal.addEventListener('click', (e) => {
+            if (e.target === registerModal) {
+                closeRegisterModal();
+            }
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                if (videoModal.classList.contains('active')) {
+                    closeVideoModal();
+                }
+                if (editorModal.classList.contains('active')) {
+                    closeVideoEditor();
+                }
+                if (loginModal.classList.contains('active')) {
+                    closeLoginModal();
+                }
+                if (registerModal.classList.contains('active')) {
+                    closeRegisterModal();
+                }
+            }
+        });
+    </script>
+    <!-- Add Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+</body>
+</html>
