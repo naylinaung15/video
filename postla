@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thai Districts & Areas Map (ထိုင်းခရိုင်များ)</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Myanmar:wght@300;400;500;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .myanmar-text {
+            font-family: 'Noto Sans Myanmar', sans-serif;
+        }
+        .english-text {
+            font-family: 'Inter', sans-serif;
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .search-box {
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.9);
+        }
+        .district-card {
+            background: linear-gradient(145deg, #ffffff, #f8fafc);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+        .category-badge {
+            background: linear-gradient(45deg, #4f46e5, #7c3aed);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 english-text">
+    <!-- Header -->
+    <header class="gradient-bg text-white py-12">
+        <div class="container mx-auto px-4">
+            <h1 class="text-4xl md:text-6xl font-bold text-center mb-4">
+                <i class="fas fa-map-marked-alt mr-4"></i>
+                Thai Districts & Areas
+            </h1>
+            <p class="text-xl text-center opacity-90 myanmar-text">ထိုင်းနိုင်ငံ ခရိုင်နှင့် ဒေသများ</p>
+            <div class="flex justify-center mt-8">
+                <div class="search-box rounded-2xl p-2 w-full max-w-md">
+                    <div class="relative">
+                        <input 
+                            type="text" 
+                            id="searchInput" 
+                            placeholder="Search districts... ခရိုင်ရှာရန်"
+                            class="w-full py-3 pl-12 pr-4 rounded-xl border-0 focus:ring-2 focus:ring-purple-500 outline-none text-gray-700"
+                        >
+                        <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Statistics -->
+    <section class="py-8 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div class="text-center">
+                    <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <i class="fas fa-city text-2xl text-blue-600"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-800" id="totalCount">0</h3>
+                    <p class="text-gray-600">Total Districts</p>
+                </div>
+                <div class="text-center">
+                    <div class="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <i class="fas fa-map text-2xl text-green-600"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-800" id="bangkokCount">0</h3>
+                    <p class="text-gray-600">Bangkok Areas</p>
+                </div>
+                <div class="text-center">
+                    <div class="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <i class="fas fa-building text-2xl text-purple-600"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-800" id="chonburiCount">0</h3>
+                    <p class="text-gray-600">Chonburi Province</p>
+                </div>
+                <div class="text-center">
+                    <div class="bg-orange-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <i class="fas fa-location-dot text-2xl text-orange-600"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-800" id="othersCount">0</h3>
+                    <p class="text-gray-600">Other Areas</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Filter Tabs -->
+    <section class="py-6 bg-gray-100">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-wrap justify-center gap-4">
+                <button class="filter-btn active px-6 py-2 rounded-full bg-purple-600 text-white font-medium" data-filter="all">
+                    <i class="fas fa-globe mr-2"></i>All Districts
+                </button>
+                <button class="filter-btn px-6 py-2 rounded-full bg-white text-gray-700 font-medium border" data-filter="bangkok">
+                    <i class="fas fa-city mr-2"></i>Bangkok
+                </button>
+                <button class="filter-btn px-6 py-2 rounded-full bg-white text-gray-700 font-medium border" data-filter="chonburi">
+                    <i class="fas fa-water mr-2"></i>Chonburi
+                </button>
+                <button class="filter-btn px-6 py-2 rounded-full bg-white text-gray-700 font-medium border" data-filter="others">
+                    <i class="fas fa-map-pin mr-2"></i>Others
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Districts Grid -->
+    <main class="py-12">
+        <div class="container mx-auto px-4">
+            <div id="districtsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <!-- Districts will be populated by JavaScript -->
+            </div>
+            
+            <!-- No Results -->
+            <div id="noResults" class="hidden text-center py-12">
+                <i class="fas fa-search text-6xl text-gray-300 mb-4"></i>
+                <h3 class="text-2xl font-bold text-gray-600 mb-2">No districts found</h3>
+                <p class="text-gray-500">Try adjusting your search criteria</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="container mx-auto px-4 text-center">
+            <p class="mb-4">&copy; 2024 Thai Districts Map. Created with data from various sources.</p>
+            <div class="flex justify-center space-x-6">
+                <i class="fab fa-github text-2xl"></i>
+                <i class="fab fa-twitter text-2xl"></i>
+                <i class="fab fa-facebook text-2xl"></i>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // District data extracted and cleaned from the provided list
+        const districts = [
+            // Bangkok and surrounding areas
+            { name: "စမူစခွန်", english: "Sam Sen Khan", category: "bangkok", province: "Bangkok" },
+            { name: "စမူပကန်", english: "Sam Phran", category: "bangkok", province: "Bangkok" },
+            { name: "မဟာချိုင်", english: "Maha Chai", category: "bangkok", province: "Bangkok" },
+            { name: "ပထုံဌာနီ", english: "Pathum Thani", category: "bangkok", province: "Pathum Thani" },
+            { name: "နွန်ထပူရီ", english: "Nonthaburi", category: "bangkok", province: "Nonthaburi" },
+            { name: "အယုဒ္ဓရ", english: "Ayutthaya", category: "bangkok", province: "Ayutthaya" },
+            { name: "ဖလန်း2", english: "Phloen Chit", category: "bangkok", province: "Bangkok" },
+            { name: "ဘန်းခဲ", english: "Bang Kae", category: "bangkok", province: "Bangkok" },
+            { name: "အုန်းယိုင်", english: "On Nut", category: "bangkok", province: "Bangkok" },
+            { name: "နကော့ပထုံ", english: "Nakhon Pathom", category: "bangkok", province: "Nakhon Pathom" },
+            { name: "မဲဆောက်", english: "Mae Sot", category: "others", province: "Tak" },
+            { name: "ဖတ်ထနာကန်", english: "Phatthalung", category: "others", province: "Phatthalung" },
+            { name: "အုန်းနွဲ့", english: "On Nut", category: "bangkok", province: "Bangkok" },
+            { name: "ဘန်မကေ်", english: "Bang Makok", category: "bangkok", province: "Bangkok" },
+            { name: "ဖတ်ခနုံံ", english: "Phra Khanong", category: "bangkok", province: "Bangkok" },
+            { name: "လကဘန်း", english: "Lat Phrao", category: "bangkok", province: "Bangkok" },
+            { name: "ထိုင်းဌာနီ", english: "Thai Thani", category: "others", province: "Various" },
+            
+            // Chonburi Province
+            { name: "Chonburi", english: "Chonburi", category: "chonburi", province: "Chonburi" },
+            { name: "လရောင်", english: "Laem Chabang", category: "chonburi", province: "Chonburi" },
+            { name: "ပတ္တရာ", english: "Pattaya", category: "chonburi", province: "Chonburi" },
+            { name: "ချာချင်ဆောင်", english: "Chachoengsao", category: "chonburi", province: "Chachoengsao" },
+            { name: "pattaya", english: "Pattaya", category: "chonburi", province: "Chonburi" },
+            
+            // Other areas
+            { name: "ဖစ်ပူရီ", english: "Phitsanulok", category: "others", province: "Phitsanulok" },
+            { name: "ဘန်မကော်", english: "Bang Makok", category: "bangkok", province: "Bangkok" },
+            { name: "ဖလန်းစီ", english: "Phloen Chit", category: "bangkok", province: "Bangkok" },
+            { name: "ဘန်ဘော", english: "Bang Bo", category: "bangkok", province: "Bangkok" },
+            { name: "လမင်ထာ", english: "Lat Mayom", category: "bangkok", province: "Bangkok" },
+            { name: "မင်ပူရီ", english: "Min Puri", category: "bangkok", province: "Bangkok" },
+            { name: "Dusit", english: "Dusit", category: "bangkok", province: "Bangkok" },
+            { name: "Chatuchak", english: "Chatuchak", category: "bangkok", province: "Bangkok" },
+            { name: "ပချာအူထစ်", english: "Phaya Thai", category: "bangkok", province: "Bangkok" },
+            { name: "Bangkapi", english: "Bangkapi", category: "bangkok", province: "Bangkok" },
+            { name: "ဘန်းနား", english: "Bang Na", category: "bangkok", province: "Bangkok" },
+            { name: "ဖလန်းဆောင်", english: "Phloen Chit", category: "bangkok", province: "Bangkok" },
+            { name: "Sai Mai", english: "Sai Mai", category: "bangkok", province: "Bangkok" },
+            { name: "နဝမင်း", english: "Nawamin", category: "bangkok", province: "Bangkok" },
+            { name: "လချာတာ", english: "Lat Phrao", category: "bangkok", province: "Bangkok" },
+            { name: "လန်စစ်", english: "Lam Sali", category: "bangkok", province: "Bangkok" },
+            { name: "ပါနန်း", english: "Pa Daeng", category: "bangkok", province: "Bangkok" },
+            { name: "အေကချိုင်", english: "Ekkamai", category: "bangkok", province: "Bangkok" },
+            { name: "ဘန်ကဒီ", english: "Bang Khae", category: "bangkok", province: "Bangkok" },
+            { name: "Sukhumvit", english: "Sukhumvit", category: "bangkok", province: "Bangkok" },
+            { name: "ဘန်ဖီ", english: "Bang Pho", category: "bangkok", province: "Bangkok" },
+            { name: "ဆိုင်းမိုင်", english: "Saen Saep", category: "bangkok", province: "Bangkok" },
+            { name: "ဖိကစင်", english: "Phikul Thong", category: "bangkok", province: "Bangkok" },
+            { name: "လမ်းကဟယ်", english: "Lat Krabang", category: "bangkok", province: "Bangkok" },
+            { name: "Phayathai", english: "Phayathai", category: "bangkok", province: "Bangkok" },
+            { name: "Nong Chok", english: "Nong Chok", category: "bangkok", province: "Bangkok" },
+            { name: "‌ဒေါင် ခနောင်", english: "Don Mueang", category: "bangkok", province: "Bangkok" },
+            { name: "Supornchai", english: "Supornchai", category: "bangkok", province: "Bangkok" },
+            { name: "စူကိုဝစ်105", english: "Sukhumvit 105", category: "bangkok", province: "Bangkok" },
+            { name: "စီကိုဝစ်", english: "Sukhumvit", category: "bangkok", province: "Bangkok" },
+            { name: "လချာဒါ", english: "Lat Phrao", category: "bangkok", province: "Bangkok" },
+            { name: "ဘန်ပကောbig c", english: "Bang Pho Big C", category: "bangkok", province: "Bangkok" },
+            { name: "သလာထိုင်", english: "Sala Thammasop", category: "others", province: "Various" },
+            { name: "ဖက်ကဒဲ", english: "Pak Kret", category: "bangkok", province: "Nonthaburi" },
+            { name: "ဒင်းဒဲ", english: "Din Daeng", category: "bangkok", province: "Bangkok" },
+            { name: "လတ်ဖောင်း", english: "Lat Phrao", category: "bangkok", province: "Bangkok" },
+            { name: "ဖလန်းစံ", english: "Phloen Chit", category: "bangkok", province: "Bangkok" },
+            { name: "အနုစာဝါတီ", english: "Anusawari", category: "bangkok", province: "Bangkok" },
+            { name: "သလီချန်း", english: "Sali Chan", category: "bangkok", province: "Bangkok" },
+            { name: "စူကိုဝစ်", english: "Sukhumvit", category: "bangkok", province: "Bangkok" },
+            { name: "wattana", english: "Watthana", category: "bangkok", province: "Bangkok" },
+            { name: "ဆာထောင်း", english: "Saphan Phong", category: "bangkok", province: "Bangkok" },
+            { name: "BKK office", english: "Bangkok Office", category: "bangkok", province: "Bangkok" },
+            { name: "Regent court", english: "Regent Court", category: "bangkok", province: "Bangkok" },
+            { name: "စူကိုဝစ် 71", english: "Sukhumvit 71", category: "bangkok", province: "Bangkok" },
+            { name: "စီလုံ", english: "Silom", category: "bangkok", province: "Bangkok" },
+            { name: "ဘန်းနာစူကိုဝစ်", english: "Bang Na Sukhumvit", category: "bangkok", province: "Bangkok" },
+            { name: "ကထွန်ဘယ်", english: "Chatuchak", category: "bangkok", province: "Bangkok" },
+            { name: "ရာဝန", english: "Ratchada", category: "bangkok", province: "Bangkok" },
+            { name: "charoen krung", english: "Charoen Krung", category: "bangkok", province: "Bangkok" },
+            { name: "သလာဘန်းခဲ", english: "Sala Bang Khae", category: "bangkok", province: "Bangkok" },
+            { name: "ပသိုနန်း Indra Suqare", english: "Pratunam Indra Square", category: "bangkok", province: "Bangkok" },
+            { name: "ဖိကစင် 69", english: "Phikul Thong 69", category: "bangkok", province: "Bangkok" },
+            { name: "ဘန်ဘိုထောင်", english: "Bang Pho", category: "bangkok", province: "Bangkok" },
+            { name: "နောင်ခဲ", english: "Nong Khaem", category: "bangkok", province: "Bangkok" },
+            { name: "ဖလန်းစီRama4", english: "Phloen Chit Rama 4", category: "bangkok", province: "Bangkok" },
+            { name: "ဖတ်ပဒဲ", english: "Phatthalung", category: "others", province: "Phatthalung" },
+            { name: "စာထောင်း", english: "Saphan Phong", category: "bangkok", province: "Bangkok" },
+            { name: "ဖလන်ဆောင်", english: "Phloen Chit", category: "bangkok", province: "Bangkok" },
+            { name: "ဘန်ခေါလယ်", english: "Bang Kho Laem", category: "bangkok", province: "Bangkok" },
+            { name: "Silom", english: "Silom", category: "bangkok", province: "Bangkok" },
+            { name: "Huai Khwang", english: "Huai Khwang", category: "bangkok", province: "Bangkok" },
+            { name: "ဘော် ဝင်း", english: "Bo Win", category: "chonburi", province: "Chonburi" },
+            { name: "ဖလန်း9", english: "Phloen Chit 9", category: "bangkok", province: "Bangkok" },
+            { name: "လာမင်ထာ", english: "Lat Mayom", category: "bangkok", province: "Bangkok" },
+            { name: "အော် နု 39", english: "On Nut 39", category: "bangkok", province: "Bangkok" },
+            { name: "Regent Court", english: "Regent Court", category: "bangkok", province: "Bangkok" },
+            { name: "လက်ဖောင်း", english: "Lat Phrao", category: "bangkok", province: "Bangkok" },
+            { name: "Rama2", english: "Rama 2", category: "bangkok", province: "Bangkok" },
+            { name: "Phayathai", english: "Phayathai", category: "bangkok", province: "Bangkok" },
+            { name: "prawet", english: "Prawet", category: "bangkok", province: "Bangkok" },
+            { name: "latphrao 112", english: "Lat Phrao 112", category: "bangkok", province: "Bangkok" },
+            { name: "ပတူနန်း", english: "Pratunam", category: "bangkok", province: "Bangkok" },
+            { name: "စူကိုဗစ်", english: "Sukhumvit", category: "bangkok", province: "Bangkok" },
+            { name: "Latphrao 112", english: "Lat Phrao 112", category: "bangkok", province: "Bangkok" },
+            { name: "Taling Chan", english: "Taling Chan", category: "bangkok", province: "Bangkok" },
+            { name: "Prawet", english: "Prawet", category: "bangkok", province: "Bangkok" },
+            { name: "စူစဝစ် 43", english: "Sukhumvit 43", category: "bangkok", province: "Bangkok" },
+            { name: "Thawi wahlla", english: "Thawi Watthana", category: "bangkok", province: "Bangkok" },
+            { name: "ဒင်ဒဲ", english: "Din Daeng", category: "bangkok", province: "Bangkok" },
+            { name: "On Nut 35", english: "On Nut 35", category: "bangkok", province: "Bangkok" },
+            { name: "မဟာချိုင်ထိုင်းယူနစ်", english: "Maha Chai Thai Unit", category: "bangkok", province: "Bangkok" },
+            { name: "ဘန်းယိုင်", english: "Bang Yai", category: "bangkok", province: "Bangkok" },
+            { name: "ဖလန်း3", english: "Phloen Chit 3", category: "bangkok", province: "Bangkok" },
+            { name: "Huai khwang", english: "Huai Khwang", category: "bangkok", province: "Bangkok" },
+            { name: "စိုင်းစီ", english: "Saen Saep", category: "bangkok", province: "Bangkok" },
+            { name: "ထိုင်းယူနစ်", english: "Thai Unit", category: "bangkok", province: "Bangkok" },
+            { name: "Thon Buri", english: "Thon Buri", category: "bangkok", province: "Bangkok" },
+            { name: "နွန်ထပူလီ", english: "Nonthaburi", category: "bangkok", province: "Nonthaburi" },
+            { name: "စမူစာခွန်", english: "Sam Sen Khan", category: "bangkok", province: "Bangkok" },
+            { name: "Thung Khru", english: "Thung Khru", category: "bangkok", province: "Bangkok" },
+            { name: "ဘန်နာ", english: "Bang Na", category: "bangkok", province: "Bangkok" },
+            { name: "အယုဒ္ဒယ", english: "Ayutthaya", category: "bangkok", province: "Ayutthaya" },
+            { name: "အော် နု", english: "On Nut", category: "bangkok", province: "Bangkok" },
+            { name: "Indra Square", english: "Indra Square", category: "bangkok", province: "Bangkok" },
+            { name: "Bangkok Noi", english: "Bangkok Noi", category: "bangkok", province: "Bangkok" },
+            { name: "လတ်ဖလောင်း", english: "Lat Phrao", category: "bangkok", province: "Bangkok" },
+            { name: "စမူပကန်ပါနန်း", english: "Sam Phran Pratunam", category: "bangkok", province: "Bangkok" },
+            { name: "Watthana", english: "Watthana", category: "bangkok", province: "Bangkok" },
+            { name: "လာလုကာ", english: "Lat Lum Kaeo", category: "bangkok", province: "Bangkok" },
+            { name: "စူကိုဝစ်109", english: "Sukhumvit 109", category: "bangkok", province: "Bangkok" },
+            { name: "Thawi watthana", english: "Thawi Watthana", category: "bangkok", province: "Bangkok" },
+            { name: "လဖောင်း", english: "Lat Phrao", category: "bangkok", province: "Bangkok" },
+            { name: "ဆိုင်ဟ", english: "Saen Saep", category: "bangkok", province: "Bangkok" },
+            { name: "စိုင်းစီ", english: "Saen Saep", category: "bangkok", province: "Bangkok" },
+            { name: "Thung Khru", english: "Thung Khru", category: "bangkok", province: "Bangkok" },
+            { name: "ဖတ်ခနုံ", english: "Phra Khanong", category: "bangkok", province: "Bangkok" },
+            { name: "ဖလန်း9", english: "Phloen Chit 9", category: "bangkok", province: "Bangkok" },
+            { name: "စူစဝမ်", english: "Sukhumvit", category: "bangkok", province: "Bangkok" },
+            { name: "ခေါက်ဆန်", english: "Khlong San", category: "bangkok", province: "Bangkok" },
+            { name: "Rama soi", english: "Rama Road", category: "bangkok", province: "Bangkok" },
+            { name: "တလာဘန်းကကေ်", english: "Talad Bang Khae", category: "bangkok", province: "Bangkok" },
+            { name: "Sothon", english: "Sothon", category: "chonburi", province: "Chonburi" },
+            { name: "ပတိုနန်း", english: "Pratunam", category: "bangkok", province: "Bangkok" },
+            { name: "နကော့ပ ထုံ", english: "Nakhon Pathom", category: "bangkok", province: "Nakhon Pathom" },
+            { name: "စူစဝပ်", english: "Sukhumvit", category: "bangkok", province: "Bangkok" },
+            { name: "chaktuchak", english: "Chatuchak", category: "bangkok", province: "Bangkok" },
+            { name: "PHAYA THAI", english: "Phaya Thai", category: "bangkok", province: "Bangkok" },
+            { name: "စူကိုဝစ်71", english: "Sukhumvit 71", category: "bangkok", province: "Bangkok" },
+            { name: "Sai Mai", english: "Sai Mai", category: "bangkok", province: "Bangkok" },
+            { name: "ဘန်ကော့‌နော", english: "Bang Khon Thun", category: "bangkok", province: "Bangkok" },
+            { name: "ဘန်ခွန်ထီယံ", english: "Bang Khun Thian", category: "bangkok", province: "Bangkok" },
+            { name: "ဖလန်6", english: "Phloen Chit 6", category: "bangkok", province: "Bangkok" },
+            { name: "ဖတ်ခနု", english: "Phra Khanong", category: "bangkok", province: "Bangkok" },
+            { name: "စူ ကိုဝစ်", english: "Sukhumvit", category: "bangkok", province: "Bangkok" }
+        ];
+
+        // Remove duplicates based on English name
+        const uniqueDistricts = districts.reduce((acc, current) => {
+            const x = acc.find(item => item.english === current.english);
+            if (!x) {
+                return acc.concat([current]);
+            } else {
+                return acc;
+            }
+        }, []);
+
+        let filteredDistricts = [...uniqueDistricts];
+        let currentFilter = 'all';
+
+        // Initialize the page
+        function init() {
+            renderDistricts(filteredDistricts);
+            updateStatistics();
+            setupEventListeners();
+        }
+
+        // Render districts
+        function renderDistricts(districts) {
+            const grid = document.getElementById('districtsGrid');
+            const noResults = document.getElementById('noResults');
+            
+            if (districts.length === 0) {
+                grid.innerHTML = '';
+                noResults.classList.remove('hidden');
+                return;
+            }
+            
+            noResults.classList.add('hidden');
+            
+            grid.innerHTML = districts.map(district => `
+                <div class="district-card card-hover rounded-2xl p-6 district-item" data-category="${district.category}">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex-1">
+                            <h3 class="text-lg font-bold text-gray-800 myanmar-text mb-1">${district.name}</h3>
+                            <p class="text-sm text-gray-600 english-text">${district.english}</p>
+                        </div>
+                        <span class="category-badge text-xs px-3 py-1 rounded-full text-white font-medium">
+                            ${district.category.charAt(0).toUpperCase() + district.category.slice(1)}
+                        </span>
+                    </div>
+                    <div class="flex items-center text-sm text-gray-500">
+                        <i class="fas fa-map-marker-alt mr-2"></i>
+                        <span>${district.province}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Update statistics
+        function updateStatistics() {
+            const total = uniqueDistricts.length;
+            const bangkok = uniqueDistricts.filter(d => d.category === 'bangkok').length;
+            const chonburi = uniqueDistricts.filter(d => d.category === 'chonburi').length;
+            const others = uniqueDistricts.filter(d => d.category === 'others').length;
+            
+            document.getElementById('totalCount').textContent = total;
+            document.getElementById('bangkokCount').textContent = bangkok;
+            document.getElementById('chonburiCount').textContent = chonburi;
+            document.getElementById('othersCount').textContent = others;
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Search functionality
+            const searchInput = document.getElementById('searchInput');
+            searchInput.addEventListener('input', handleSearch);
+            
+            // Filter buttons
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            filterButtons.forEach(btn => {
+                btn.addEventListener('click', () => handleFilter(btn.dataset.filter, btn));
+            });
+        }
+
+        // Handle search
+        function handleSearch(e) {
+            const query = e.target.value.toLowerCase();
+            filteredDistricts = uniqueDistricts.filter(district => 
+                district.name.toLowerCase().includes(query) ||
+                district.english.toLowerCase().includes(query) ||
+                district.province.toLowerCase().includes(query)
+            );
+            
+            // Apply current filter
+            if (currentFilter !== 'all') {
+                filteredDistricts = filteredDistricts.filter(d => d.category === currentFilter);
+            }
+            
+            renderDistricts(filteredDistricts);
+        }
+
+        // Handle filter
+        function handleFilter(filter, button) {
+            currentFilter = filter;
+            
+            // Update button states
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active', 'bg-purple-600', 'text-white');
+                btn.classList.add('bg-white', 'text-gray-700', 'border');
+            });
+            
+            button.classList.remove('bg-white', 'text-gray-700', 'border');
+            button.classList.add('active', 'bg-purple-600', 'text-white');
+            
+            // Filter districts
+            if (filter === 'all') {
+                filteredDistricts = [...uniqueDistricts];
+            } else {
+                filteredDistricts = uniqueDistricts.filter(d => d.category === filter);
+            }
+            
+            // Apply search if active
+            const searchQuery = document.getElementById('searchInput').value.toLowerCase();
+            if (searchQuery) {
+                filteredDistricts = filteredDistricts.filter(district => 
+                    district.name.toLowerCase().includes(searchQuery) ||
+                    district.english.toLowerCase().includes(searchQuery) ||
+                    district.province.toLowerCase().includes(searchQuery)
+                );
+            }
+            
+            renderDistricts(filteredDistricts);
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
