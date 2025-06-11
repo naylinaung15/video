@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Myanmar Transportation Route Search</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Padauk:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Padauk', sans-serif;
+        }
+        .search-highlight {
+            background-color: #fef08a;
+            font-weight: bold;
+            padding: 1px 2px;
+            border-radius: 2px;
+        }
+        .route-card {
+            transition: all 0.3s ease;
+        }
+        .route-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .search-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <div class="gradient-bg text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-8">
+                <h1 class="text-4xl font-bold mb-2">
+                    <i class="fas fa-bus mr-3"></i>
+                    Myanmar Transportation Routes
+                </h1>
+                <p class="text-lg opacity-90">Search and find bus routes across Myanmar</p>
+            </div>
+            
+            <!-- Search Container -->
+            <div class="search-container max-w-4xl mx-auto p-6 rounded-2xl shadow-xl">
+                <div class="flex flex-col md:flex-row gap-4 mb-4">
+                    <div class="flex-1 relative">
+                        <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                        <input 
+                            type="text" 
+                            id="searchInput" 
+                            placeholder="Search destinations, routes, or locations..."
+                            class="w-full pl-12 pr-4 py-3 text-lg border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition-all duration-300"
+                        >
+                    </div>
+                    <div class="flex gap-2">
+                        <select id="routeFilter" class="px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none">
+                            <option value="all">All Routes</option>
+                            <option value="yangon">Yangon Routes</option>
+                            <option value="mandalay">Mandalay Routes</option>
+                            <option value="naypyidaw">Naypyidaw Routes</option>
+                            <option value="other">Other Routes</option>
+                        </select>
+                        <button id="clearBtn" class="px-6 py-3 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-colors">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Stats -->
+                <div class="flex justify-between items-center text-sm text-gray-600">
+                    <span id="resultCount">Loading routes...</span>
+                    <span id="filterStatus"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Section -->
+    <div class="container mx-auto px-4 py-8">
+        <div id="loadingSpinner" class="text-center py-12">
+            <i class="fas fa-spinner fa-spin text-4xl text-blue-500 mb-4"></i>
+            <p class="text-gray-600">Loading transportation routes...</p>
+        </div>
+        
+        <div id="noResults" class="hidden text-center py-12">
+            <i class="fas fa-search text-6xl text-gray-300 mb-4"></i>
+            <h3 class="text-2xl font-bold text-gray-600 mb-2">No routes found</h3>
+            <p class="text-gray-500">Try adjusting your search terms or filters</p>
+        </div>
+        
+        <div id="resultsGrid" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <!-- Route cards will be inserted here -->
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8 mt-12">
+        <div class="container mx-auto px-4 text-center">
+            <p>&copy; 2024 Myanmar Transportation Routes. Built with modern web technologies.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Transportation routes data
+        const transportationRoutes = [
+            "ရန်ကုန်ရုံးထုတ်", "မိတ္ထီလာ2/ ကျုံပျော်1/မုံရွာ2/မကွေး1", "တပ်ကုန်းကားဂိတ်ထုတ်", "ပြွန်တန်ဆာကားဂိတ်ထုတ်",
+            "ဘိတ်ကားဂိတ်ထုတ်", "သရက်ကားဂိတ်", "မော်လမြိုင်အိမ်အရောက်", "ဝေါကားဂိတ်ထုတ်", "သံဖြူဇရပ်ကားဂိတ်",
+            "ဖဒိုကားဂိတ်ထုတ်", "မန်းလေးမှကျောက်မဲ ကုန်ကြွေး", "ညောင်တုန်းကားဂိတ်ထုတ်", "ကြို့ပင်ကောက်",
+            "တောင်တွင်းကြီး", "ရေးကားဂိတ်ထုတ်", "အောင်လံကားဂိတ်ထုတ်", "တောင်ကြီးတောင်ပေါ် ကားဂိတ်",
+            "ကျိုက်ကော် ကားဂိတ်", "ရန်ကုန်အိမ်အ ရောက်", "တပ်ကုန်းကားဂိတ်ထုတ်", "ညောင်လေးပင် ကားဂိတ်ထုတ်",
+            "မြဝတီအိမ်အရောက်", "ပျော် ဘွယ် ကားဂိတ်ထုတ်", "ကျိုက်ထိုကားဂိတ်ထုတ်", "ပန်းတနော်ကားဂိတ်ထုတ်",
+            "မင်းဘူးကားဂိတ်ထုတ်", "ပဲခူးကားဂိတ်ထုတ်", "အောင်လံ", "ကျောက်ကုန်းကားဂိတ်ထုတ်", "မ ကွေး သရက်ကားဂိတ်ထုတ်",
+            "ဘုရားကြီး ကားဂိတ်ထုတ်", "ပုသိမ်ကားဂိတ်ထုတ်", "ဖြူးကားဂိတ်ထုတ်", "မြိုင်ကလေး ကားဂိတ်ထုတ်",
+            "ရန်ကုန်ကားဂိတ်ထုတ်", "ပဲခူး ရွေကျင်ကားဂိတ်ထုတ်", "အင်ပင် ကားဂိတ်ထုတ်", "ပေါက် ခေါင်း ဘုန်းမြတ်ပိုင်ကားဂိတ်",
+            "မန်းလေး ကားဂိတ်ထုတ်", "ဒိုက်ဦးကားဂိတ်ထုတ်", "ဆင်ပေါင်ဝဲကားဂိတ်ထုတ်", "နေပြည်တော် မြို့မဈေး",
+            "အောက် မင်းလှကားဂိတ်ထုတ်", "ရေနီကားဂိတ်ထုတ်", "မုံရွာကားဂိတ်ထုတ်", "တပ်ကုန်း/မကွေးပွင့်ဖြူ",
+            "တောင်ငူကားဂိတ်ထုတ်", "လက်ပံတန်း", "နွားထိုးကြီး", "ကံမစိန်တလုံး", "ဘီး‌လင်းတောင်စွန်းကားဂိတ်ထုတ်",
+            "ရန်ကုန်အောင်မင်္ဂလာကားဂိတ်ထုတ်", "မုတ္တမ ကားဂိတ်ထုတ်", "ပြင်ဦးလွင်ကားဂိတ်ထုတ်", "မန်းလေးရုံးထုတ်",
+            "ချောင်းသာကားဂိတ်ထုတ်", "ကျောင်းကုန်းကားဂိတ်ထုတ်", "နတ်မောက် ကားဂိတ်ထုတ်", "ထားဝယ်ကားဂိတ်ထုတ်",
+            "ဘတ်ရဲ ကားဂိတ်ထုတ်", "ထူးကြီး ကားဂိတ်ထုတ်", "အထက်မင်းလှကားဂိတ်ထုတ်", "အုတ်ဖိုကားဂိတ်ထုတ်",
+            "ဆွာကားဂိတ်ထုတ်", "အောင်မင်္ဂလာကားဂိတ်ထုတ်", "မြဝတီရုံးထုတ်", "မိတ္ထီလာကားဂိတ်ထုတ်",
+            "ကံမ စိန်တလုံးကားဂိတ်ထုတ်", "ဆက်သွားကားဂိတ်ထုတ်", "မြန်အောင်ကားဂိတ်ထုတ်", "တောင်ငူရေတာရှည်ချင်းတွင်းကားဂိတ်",
+            "မန်းလေးအိမ်အရောက်", "လယ် ဝေးကားဂိတ်ထုတ်", "နေပြည်တော် မြို့မဂိတ်", "အောင်မင်္ဂလာအဝေးပြေးကားဂိတ်",
+            "ကြံခင်းကားဂိတ်ထုတ်", "ဇလွန်ကားဂိတ်ထုတ်", "နေပြည်တော် ကားဂိတ်ထုတ်", "ကျုံးဒိုးကားဂိတ်ထုတ်",
+            "အထောင်မြို့ ကားဂိတ်ထုတ်", "ဘီးလင်းအိမ်အရောက်", "ရမည်းသင်းကားဂိတ်ထုတ်", "သထုံ ကားဂိတ်",
+            "အပေါင် သဲကုန်းအိမ်အရောက်", "အောင်မင်္ဂလာကားဝင်း (ငွေကမ္ဘာကားဂိတ်ပို့ရန်)", "ကညွတ်ကွင်း ကားဂိတ်ထုတ်",
+            "လှိုင်သာယာ အဝေးပြေးကားဂိတ်", "အောင်မင်္ဂလာကားဂိတ်", "နေပြည်တောကားဂိတ်", "လက်ပံတန်းကားဂိတ်",
+            "သိမ်ဇရပ်ကারဂိတ်", "အောင်မင်္ဂလာကားကွင်း (ငွေကမ္ဘာကားဂိတ်ပို့ရန်)", "ကျောက်ပန်း,တောင်းကားဂိတ်ထုတ်",
+            "တောင်ကြီးတောင်ပေါ် ကားဂိတ်ထုတ်", "ကျောက်ဆည် ကားဂိတ်ထုတ်", "တိုက်ကြီးကားဂိတ်ထုတ်",
+            "ဘီလူးကျွန်းကားဂိတ်ထုတ်", "လှိုင်သာယာ ဒဂုံ ဧရာ အဝေးပြေးကားဂိတ်", "သဲကုန်းကားဂိတ်ထုတ်",
+            "ဟင်္သာတ/သနပ်ပင်/ကျောက်တံခါး", "အောင်ပန်းကားဂိတ် ထုတ်", "ကျိုက်ထို မုပ္ပလင် ကားဂိတ်ထုတ်",
+            "သာယာဝတီ ကားဂိတ်ထုတ်", "အသုတ်ကားဂိတ်ထုတ်", "မြဝတီကားဂိတ်ချ", "ဇီးကုန်းကားဂိတ်ထုတ်",
+            "မုဒုံကားဂိတ်ထုတ်", "ရန်ကုန်ကားဂိတ်ထုတ်-လက်ပံတန်းသို့ကုန်ကြေ ွးပို့ရန်", "မြစ်ကျိုးလမ်းဆုံ",
+            "မြဝတီမှ ခရမ်းသို့ကုန်ကြွေးပို့ရန်", "အိမ်မဲ ရွာသစ်ကားဂိတ်ထုတ်", "နတ်တလင်း တောင်တွင်းကြီး",
+            "ရန်ကုန်မှဂန်ဂေါသို့ကုန်ကြွေးတင်ရန်", "ကြို့ပင်ကောက် ကားဂိတ်ထုတ်//2အိတ် သာယာဝတီကားဂိတ်ထုတ်//3အိတ်",
+            "မင်းလှအုတ်ဖိုကားဂိတ်ထုတ်", "မင်းဘူးစကူမြို့", "ပဲခူးဘူရားကြီးလမ်းဆုံ", "ပဲနွယ်ကုန်းကားဂိတ်ထုတ်",
+            "သထုံအိမ်အရောက်", "ရန်ကုန်ကားဂိတ်ချ", "လေးမျက်နှာ ကားဂိတ်ထုတ်", "မဲဆောက်ရုံးထုတ်",
+            "လှည်းကူးကားဂိတ်ထုတ် နေပြည်တော်ကားဂိတ်ထုတ်(tv)", "ရွေ ဘို ကားဂိတ်ထုတ်", "နေပြည်တော် ကားဂိတ်ထုတ်(2ထုတ်) သနပ္ပင်ကားဂိတ်ထုတ်(1ထုတ်)",
+            "လက်ပံတန်းကားဂိတ်ထုတ် မန်းလေး ကားဂိတ်ထုတ်", "ဇင်းကျိုက်အိမ်အရောက်", "ဖဒို ကားဂိတ်ထုတ်",
+            "ဘောဂသီရိကားဂိတ်ထုတ်", "ရွေလောင်း ကားဂိတ်ထုတ်", "အေး သာ ယာ ကားဂိတ်ထုတ်", "မိတ္ထီလာ မလှိုင် ကားဂိတ်ထုတ်",
+            "အောင်လံ(ပုံး) တောင်ကြီး (အိတ်)", "ဖျာပုံကားဂိတ်ထုတ်", "နတ်တလင်းကားဂိတ်ထုတ်", "မြစ်ကြီးနား ကားဂိတ်ထုတ်",
+            "လှည်းကူးကားဂိတ်ထုတ်", "ချောင်းဆုံကားဂိတ်ထုတ်", "ကွင်းကောက် ထူးကြီး မြန်အောင်", "ငါးသိုင်းချောင်းကားဂိတ်ထုတ်",
+            "(ပုသိမ်မြို့ဒါးက မြဝတီကားဂိတ်)", "သက္ကလကားဂိတ်ထုတ်", "မြဝတီမှ သာဂရသို့ ကုန်ကြွေးတင်ရန်",
+            "တောင်ကြီး အေးသာယာကားဂိတ်ထုတ်", "ဒဂုံံ ဧရာကားဂိတ်", "သာစည်ကားဂိတ်ထုတ်", "မိတ္ထီလာ ရွေမန္တလာဂိတ်ထုတ်",
+            "သရက်မြို့ကားဂိတ်ထုတ်", "သာဂရကားဂိတ်ထုတ်", "လှိုင်သာယာ အဝေးပြေးကားဂိတ်", "မြို့သစ်မြို့ကားဂိတ်ထုတ်",
+            "အောင်လံပြလို့ကားဂိတ်ထုတ်", "ပဲခူးဘုရားကြီးကားဂိတ်", "အင်းတကော် ကားဂိတ်ထုတ်", "မြင်းခြံကားဂိတ်ထုတ်",
+            "ထိန်တော မိုးညိုকားဂိတ်", "တောင်သာကားဂিတ်ထုတ်", "ဖြူးကားဂိတ်ထုတ် ပုသိမ်ကားဂိတ်ထုတ်",
+            "အသုတ်ကားဂိတ်ထုတ် မန်းလေးမှ ကလေးမြို့ကုန်ကြွေး", "တောင်ငူကားဂိတ်ထုတ် ရန်ကုန်ရုံးထုတ်", "မအူပင်ကားဂိတ်ထုတ်",
+            "ညောင်ခါးရှည်ကားဂိတ်", "ဒဂုံဧရာ အဝေးပြေး", "မြင်းခြံကားဂိတ်ထုတ်", "ပဲခူး ကားဂိ်ထုတ်",
+            "မြိတ်ကားဂိတ်ထုတ်", "စလင်းကားဂိတ်ထုတ်", "လပ္ပတ္တာကားဂิတ်", "အောင်မင်္ဂလာကားဂিတ်ထုတ် ပြင်ဦးလွင်",
+            "မြောင်းမြ", "လက်ပံတန်းကားဂိတ်ထုတ် ပြည်ကားဂိတ်ထုတ် လှိုင်သာယာအိမ်အရောက်", "အုတ်မင်းလှ1 သထုံအိမ်အရောက်2 သံဖြူဇရပ်ကားဂိတ်ထုတ်2",
+            "‌ေညာ,င်လေးပင် ကားဂိတ်ထုတ်", "တောင်ဒဂုံ အိမ်အရောက်", "တပ်ကုန်းရွေနိုင်ငံကားဂိတ်ထုတ်", "ရန်ကုန် အောင်ဆန်းကားဂိတ်",
+            "ဝေါ မျိုးလေးကားဂိတ်ထုတ်", "တောင်ကြီး တောင်ပေါ် ဂာားဂိတ်", "ကျောက်တံခါးကားဂိတ်ထုတ်", "ပွင့်ဖြူကားဂိတ်ထုတ်",
+            "မန်းလေးမှ လားရှိုး ကုန်ကြွေးတင်ရန်", "ဘားအံအိမ်အရောက်", "ပျော်ံဘွယ် ကားဂိတ်ထုတ်", "တပ်ကုန်းကားဂိတ်ထုတ် ဝမ်းတွင်း ကားဂိတ်ထုတ်",
+            "ဘားအံရုံးထုတ်", "အိမ်မဲ ကားဂိတ်ထုတ်", "ကျောင်းကုန်း ဒါးက လမ်းဆုံ", "ဆိပ်ဖြူ ကားဂိတ်ထုတ်",
+            "မြန်အောင်အင်ပင်ကားဂိတ်ထုတ်", "ရန်ကုန်မှသရက်ကိုကုန်ကြွေဖြင့်တင်ရန်", "တောင်ကြီး ရန်ကုန်အိမ်အရောက်",
+            "ရွှေဘိုကားဂိတ်ထုတ်", "ဝမ်းတွင်းကားဂိတ်ထုတ်", "ပျေ်ဘွယ် ကားဂိတ်ထုတ်", "ရန်ကုန်အိမ်အရောက်",
+            "တောင်ူကားဂိတ်ထုတ်", "ရေတာရှည် ကားဂိတ်ထုတ်", "ရန်ကုန် အောင်မင်္ဂလားကားဂိတ်ထုတ်", "ကျောက်ကုန်း ဒါးက လမ်းဆုံ",
+            "ဇေယျာဝတီ ကားဂိတ်ထုတ်", "အောင်မင်္ဂလာဂိတ်ထုတ်", "မကွေးပဒါန်း ကားဂိတ်ထုတ်", "မင်းတုန်းကားဂိတ်ထုတ်",
+            "မကွေးရွှေပွင့်ဖြူကားဂိတ်ထုတ်", "ဆားမလောက် ကားဂိတ်ထုတ်", "ပင် လောင်းကားဂိတ်ထုတ်", "ကျောက်တံခါးမြိုနယ် ပဲနွယ်ကုန်းကားဂိတ်",
+            "လှည်းကူး တာဆုံ ကားဂိတ်ထုတ်", "ညောင် ကျိုး ကားဂိတ်ထုတ်", "တောင်ကြီး ရွေညောင်ကားဂိတ်ထုတ်", "မိတ္ထီလာသာစည်ကားဂိတ်ထုတ်",
+            "မိုးကောင်း ကားဂိတ်ထုတ်", "မ ကွေး စကု ကားဂိတ်ထုတ်", "ရွေဘို ကားဂိတ်ထုတ်", "ပခုက္ကူကားဂိတ်ထုတ်",
+            "ပုဂံကားဂိတ်ထုတ်", "ထောက်ကြံကားဂိတ်ထုတ်", "သာစည် ကားဂိတ် ရန်ကုန်ကားဂိတ်ထုတ်", "ချောက်ကားဂိတ်ထုတ်",
+            "မ ကွေး မြို့သစ်ကားဂิတ်ထုတ်", "ကျွဲပွဲ ကားဂိတ်ထုတ်", "ပေါင်းတည်ကားဂိတ်ထုတ်", "ရွေ ညောင် ကားဂိတ်ထုတ်",
+            "တောကျွဲအင်ကားဂိတ်ထုတ်", "ပြည်းကားဂိတ်ထုတ်", "ပဲခူး-ဘုရာကြီးလမ်းဆုံးကားဂိတ်", "နတ်တလင်း တောင်တွင်းကြီး ဝမ်းတွင်း",
+            "ရပ်စောက်9", "နတ်တလင်းကားဂိတ်", "ဝါးခယ်မကားဂิတ် ဒဂုံဧရာအဝေး ပြေးကားဂိတ်", "အုတ်ဖို တာဆူံကားဂိတ်ထုတ်",
+            "ရန်ကုန်အောင်မင်္ဂလာ", "ဝမ်းတွင်း ရန်ကုန်အောင်မင်္ဂလာ", "မိုးညိုကားဂိတ်ထုတ်", "ဒေးဒရဲ ကားဂിတ်ထုတ်",
+            "ဓ နု ဖြူကားဂિတ်ထုတ်", "မုပ္ပလင်ကားဂിတ်ထုတ်", "ရပ်စောက်ကားဂိတ်ထုတ်", "ညောင်လေးပင်ကားဂិတ်",
+            "တပ်ကုန်းကားဂિတ်", "ထားဝယ်ကားဂિတ်", "နေပြည်တော်တပ်ကုန်း", "ဝါးခယ်မကားဂิတ်", "ရပ်စောက်ကားဂိတ်",
+            "ပျော်ဘွ ယ်ကားဂိတ်", "ညောင်လေးပင်ကားဂိတ်", "ရန်ကုန်စိန်တစ်လုံးကားဂിတ်", "ပဲ ခူးမြို့ကားဂိတ်",
+            "ပုသိမ်ကားဂိတ်", "မြင်ခြံကားဂိတ်", "အောင်လံကားဂိတ်", "ထားဝယ်ကားဂિတ်", "တပ်ကုန်းကားဂိတ်",
+            "ငသိုင်ချာင်းကားဂိတ်", "မြန်အောင်ကားဂိတ်", "အောင်လံ ကားဂိတ်ထုတ် သရက်စိန်တလုံးကားဂিတ်ထုတ်",
+            "မုတ္တမ ကားဂিတ်ထုတ်", "တပ်ကုန်းကားဂိ်ထုတ်", "ဥက္ကံကားဂिတ်ထုတ်", "ရမည်းသင်း ကားဂိတ်ထုတ်",
+            "မိုးညိုကားဂိတ်ထုတ် အောင်မင်္ဂလာကားဂိတ်ထုတ်", "အင်းတကော် ကားဂিတ်ထု်", "ဧရာဝတီ ကန်ကြီထောင့်ကားဂိတ်",
+            "ဟသ်ာတကားဂိတ်ထုတ်", "အင်္ဂပူကားဂိတ်ထုတ်", "နတ်‌ေမောက်ကားဂিတ်ထုတ်", "ရေစကြို ကားဂિတ်",
+            "မြန်အောင်ကားဂિတ်", "ခရမ်းကားဂိတ်ထုတ်", "ဓနုဖြူကားဂိတ်ထုတ်", "အုတ်တွင်းကားဂিတ်ထုတ်",
+            "ပင်လောင်းကားဂိတ်ထုတ်", "ဧရာဝတီ-ရှာခဲကားဂிတ်ထုတ်", "ကျိုက်ထို ထားတယ်23 ဆိပ်ဖြူ",
+            "ရန်ကုန်ရုံးထုတ် မန်းလေး ကားဂিတ်ထုတ်", "ကျွဲပွဲကားဂિတ်ထုတ်", "မြောင်းမြကားဂိတ်ထုတ်",
+            "ပဲခူးရွေတောင်ကားဂိတ်ထုတ် လက်ပံတန်း", "ငဖဲကားဂိတ်ထုတ်", "ရန်ကုန်‌ေအာင်မင်္ဂလာ ကားဂिတ်ထုတ်",
+            "မြို့သစ်မြို့ကားဂိတ်ထုတ်", "ကလော ကားဂిတ်ထုတ်", "သာယာဝတီ(သုံးဆယ်) ကားဂิတ်ထုတ်", "လှိုင်သာယာကားဂိတ်ထုတ်",
+            "တိုက်ကြီး ကားဂิတ်", "နွားထိုးကြီး ကားဂিတ်ထုတ်", "မှော် ဘီ ကားဂિတ်ထုတ်", "ကျိုက်လတ် ကားဂిတ်ထုတ်",
+            "ပဲခူးဘုရားကြီး", "လပ္ပတ္တာကားဂিট်", "အောက်မင်းလှ1 သထုံအိမ်အရောက်2 သံဖြူဇရပ်ကားဂिတ်ထုတ်2",
+            "မြောင်းမြ", "ကျောက်တံခါး ကားဂிတ်", "အုတ်တွင်း (ကျွဲပွဲဂိတ်)ကားဂิတ်ထုတ်", "ဆက်သွားကားဂိတ်ထုတ်",
+            "ချောင်းဆုံကားဂိတ်ထုတ်", "တောင်ကြီး အေးသာယာကားဂিတ်", "မန္တလေးကားဂিတ်ထုတ်", "ငွေဆောင်ကားဂিတ်ထုတ်",
+            "အုတ်တွင်းသာကြိုင်ကားဂিတ်", "တောင်ကြီး တောင်ပေါ် ကားဂိတ်", "ရန်ကုန် ကော့ မှုူးကားဂိတ်ထုတ်",
+            "ဆင် ပေါင် ဝဲ", "ရွေဘို ဝက်ထီးကန် ညောင်ခါးရှည်", "သာဝတ္ထိကားဂိတ်", "သက္ကလမြို့ကားဂிတ်ထုတ်",
+            "တောင်ကြီး ရန်ကုန်အိမ်အရောက်", "ဖျာပုံ ကားဂিတ်ထုတ်", "တောင်တွင်းကြီး ဆက်သွား ကားဂিတ်ထုတ်",
+            "ပုသိမ်(ဒါးကမြဝတီကားဂိတ်)", "လပ္ပတ္တာကားဂိတ်ထုတ်", "ကွင်းကောက်ကားဂিတ်ထုတ် လက်ပံတန်းကျွန်းကလေးကားဂိတ်",
+            "ပဲခူးသနပ္ပင်ကားဂિတ်ထုတ်", "ပျော်ဘွယ်မြို့ကားဂိတ်", "မော်ကျွန်းမြို့ကားဂိတ်", "ရွှေကျင်ကားဂিတ်ထုတ်",
+            "ခရမ်းသုံးခွကားဂิတ်", "နတ်တလင်းမြို့ကားဂိတ်", "မိုးကုတ်ကားဂিတ်ထုတ်", "မိုးညို့ကားဂিတ်ထုတ်",
+            "ညောင်တုန်းကားဂિတ်ထုတ်", "မင်းတုန်းကားဂিတ်ထုတ်", "မန်းလေးမှ ကလေးသို့ ကုန်ကြွေးပို့ရန်", "ရွေကျင်ကားဂိတ်ထုတ်",
+            "မအူပင် ကားဂိတ်ထုတ်", "မြိတ်ကားဂิတ်ထုတ်", "တပ်ကုန်းရွေနိုင်ငံကားဂিတ်ထုတ်", "လေးမျက်နှာ ကားဂিတ်ထုတ်",
+            "မုံရွာ ကားဂিတ်ထုတ်", "အုတ်တွင်းသာကြိုင်ကားဂিတ်", "တောင်ကြီး တောင်ပေါ် ဂါးဂிတ်ထုတ်", "ပင် လောင်းကားဂิတ်ထုတ်",
+            "ကျောက်တံခါးမြိုနယ် ပဲနွယ်ကုန်းကားဂிတ်", "ညောင် ကျိုး ကားဂິတ်ထုတ်", "ဟင်္သာတကားဂിတ်ထုတ်",
+            "တောင်ကြီး ရွေညောင်ကားဂिတ်ထုတ်", "ပင်လောင်း ကားဂிတ်ထုတ်", "မိုးကောင်း ကားဂિတ်ထုတ်",
+            "တောင်ကြီး ရွေညောင်ကားဂিတ်ထုတ်", "ကျောက်ပန်းတောင်း ကားဂિတ်ထုတ်", "ပုဂံကားဂિတ်ထုတ်",
+            "ထောက်ကြံကားဂিတ်ထုတ်", "သာစည် ကားဂિတ် ရန်ကုန်ကားဂিတ်ထုတ်", "ချောက်ကားဂિတ်ထုတ်",
+            "မ ကွေး မြို့သစ်ကားဂิတ်ထုတ်", "သာဂရကားဂိတ်ထုတ်", "သိမ်ဇရပ်ကားဂိတ်ထုတ်", "အင်ပင် ကားဂিတ်ထုတ်",
+            "စလင်းကားဂိတ်ထုတ်", "ရေစကြို ကားဂିတ်ထုတ်", "မြောင်းမြ", "အုတ်တွင်း (ကျွဲပွဲဂိတ်)ကားဂိတ်ထုတ်",
+            "လှည်းကူးမြို့ ကားဂိတ် ထုတ်", "တောင်ကြီး အေးသာယာကားဂிတ်", "ပြွန်တန်ဆာ ကားဂិတ်ထုတ်",
+            "အုတ်တွင်းသာကြိုင်ကားဂিတ်", "ငွေဆောင်ကားဂိတ်ထုတ်", "တောင်ကြီး တောင်ပေါ် ကားဂိတ်",
+            "ရန်ကုန် ကော့ မှုူးကားဂিတ်ထုတ်", "သာဝတ္ထိကားဂိတ်ထုတ်", "သက္ကလမြို့ကားဂิတ်ထုတ်", "ဖျာပုံ ကားဂိတ်ထုတ်",
+            "တောင်တွင်းကြီး ဆက်သွား ကားဂိတ်ထုတ်", "ပုသိမ်(ဒါးကမြဝတီကားဂိတ်)", "မကွေးကားဂိတ်ထုတ်",
+            "သဲကုန်းကားဂိတ်ထုတ်", "လပ္ပတ္တာကားဂિတ်ထုတ်", "အောင်မင်္ဂလာအဝေးပြေးကားဂိတ်",
+            "ကွင်းကောက်ကားဂိတ်ထုတ် လက်ပံတန်းကျွန်းကလေးကားဂိတ်", "ပဲခူးသနပ္ပင်ကားဂိတ်ထုတ်", "မြောင်းမြကားဂိတ်ထုတ်",
+            "ပျော်ဘွယ်မြို့ကားဂိတ်", "ရန်ကုန်အောင်မင်္ဂလာကားဂိတ်", "မော်ကျွန်းမြို့ကားဂိတ်", "ရွှေကျင်ကားဂိတ်ထုတ်",
+            "ခရမ်းသုံးခွကားဂিတ်", "နတ်တလင်းမြို့ကားဂိတ်", "ကျိုက်ထိုကားဂိတ်", "မိုးကုတ်ကားဂিတ် থুတ်",
+            "သက္ကလမြို့ကားဂိတ်ថুတ်", "ပျော်ဘွယ်မြို့ကားဂিတ်", "ရန်ကုန်ကားဂิတ်ထုတ်", "ရေစကြို ကားဂိတ်ထုတ်",
+            "မိတ္ထီလာ ကားဂিတ်ထုတ်", "ဘတ်ရဲကားဂิတ်ထုတ်", "မိုးညို့ကားဂიတ်ထုတ်", "ဖဒိုကားဂိတ်ထုတ်",
+            "ညောင်တုန်းကားဂိတ်ထုတ်", "ဘီးလင်းကားဂိတ်", "မန်းလေးမှ ကလေးသို့ ကုန်ကြွေးပို့ရန်", "ရွေကျင်ကားဂিတ်ထုတ်",
+            "တပ်ကုန်းရွေနိုင်ငံကားဂিတ်ထုတ်", "လေးမျက်နှာ ကားဂိတ်ထုတ်", "ဆားမလောက် ကားဂိတ်ထုတ်",
+            "ပင် လောင်းကားဂိတ်ထုတ်", "တောင်ကြီး ရွေညောင်ကားဂিတ်ထုတ်", "မိုးကောင်း ကားဂিတ်ထုတ်",
+            "တောင်ကြီး ရွေညောင်ကားဂิတ်ထုတ်", "ကျောက်ပန်းတောင်း ကားဂిတ်ထုတ်"
+        ];
+
+        let filteredRoutes = [...transportationRoutes];
+        let currentSearchTerm = '';
+
+        // DOM elements
+        const searchInput = document.getElementById('searchInput');
+        const routeFilter = document.getElementById('routeFilter');
+        const clearBtn = document.getElementById('clearBtn');
+        const resultCount = document.getElementById('resultCount');
+        const filterStatus = document.getElementById('filterStatus');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const noResults = document.getElementById('noResults');
+        const resultsGrid = document.getElementById('resultsGrid');
+
+        // Initialize the app
+        function init() {
+            // Remove duplicates from routes
+            const uniqueRoutes = [...new Set(transportationRoutes)];
+            filteredRoutes = uniqueRoutes;
+            
+            setTimeout(() => {
+                displayResults();
+                loadingSpinner.classList.add('hidden');
+                resultsGrid.classList.remove('hidden');
+            }, 1000);
+
+            // Event listeners
+            searchInput.addEventListener('input', handleSearch);
+            routeFilter.addEventListener('change', handleFilter);
+            clearBtn.addEventListener('click', clearSearch);
+            
+            // Enter key search
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    handleSearch();
+                }
+            });
+        }
+
+        // Handle search functionality
+        function handleSearch() {
+            currentSearchTerm = searchInput.value.toLowerCase().trim();
+            applyFilters();
+        }
+
+        // Handle filter functionality
+        function handleFilter() {
+            applyFilters();
+        }
+
+        // Apply both search and filter
+        function applyFilters() {
+            const filterValue = routeFilter.value;
+            const uniqueRoutes = [...new Set(transportationRoutes)];
+            
+            let filtered = uniqueRoutes;
+
+            // Apply text search
+            if (currentSearchTerm) {
+                filtered = filtered.filter(route => 
+                    route.toLowerCase().includes(currentSearchTerm)
+                );
+            }
+
+            // Apply category filter
+            if (filterValue !== 'all') {
+                filtered = filtered.filter(route => {
+                    const routeLower = route.toLowerCase();
+                    switch(filterValue) {
+                        case 'yangon':
+                            return routeLower.includes('ရန်ကုန်');
+                        case 'mandalay':
+                            return routeLower.includes('မန္တလေး') || routeLower.includes('မန်းလေး');
+                        case 'naypyidaw':
+                            return routeLower.includes('နေပြည်တော်');
+                        case 'other':
+                            return !routeLower.includes('ရန်ကုန်') && 
+                                   !routeLower.includes('မန္တလေး') && 
+                                   !routeLower.includes('မန်းလေး') && 
+                                   !routeLower.includes('နေပြည်တော်');
+                        default:
+                            return true;
+                    }
+                });
+            }
+
+            filteredRoutes = filtered;
+            displayResults();
+        }
+
+        // Display search results
+        function displayResults() {
+            const count = filteredRoutes.length;
+            resultCount.textContent = `Found ${count} route${count !== 1 ? 's' : ''}`;
+            
+            // Update filter status
+            const filterValue = routeFilter.value;
+            if (filterValue !== 'all') {
+                const filterNames = {
+                    'yangon': 'Yangon Routes',
+                    'mandalay': 'Mandalay Routes', 
+                    'naypyidaw': 'Naypyidaw Routes',
+                    'other': 'Other Routes'
+                };
+                filterStatus.textContent = `Filter: ${filterNames[filterValue]}`;
+            } else {
+                filterStatus.textContent = '';
+            }
+
+            if (count === 0) {
+                resultsGrid.classList.add('hidden');
+                noResults.classList.remove('hidden');
+                return;
+            }
+
+            noResults.classList.add('hidden');
+            resultsGrid.classList.remove('hidden');
+
+            // Generate route cards
+            resultsGrid.innerHTML = filteredRoutes.map(route => {
+                const highlightedRoute = highlightSearchTerm(route, currentSearchTerm);
+                const routeType = getRouteType(route);
+                const routeIcon = getRouteIcon(route);
+                
+                return `
+                    <div class="route-card bg-white rounded-xl shadow-md p-6 border border-gray-100 hover:border-blue-300">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex items-center">
+                                <div class="w-12 h-12 ${routeType.color} rounded-full flex items-center justify-center text-white text-xl mb-2">
+                                    <i class="${routeIcon}"></i>
+                                </div>
+                                <div class="ml-3">
+                                    <span class="inline-block px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
+                                        ${routeType.name}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-800 leading-relaxed">
+                            ${highlightedRoute}
+                        </h3>
+                        <div class="mt-4 pt-4 border-t border-gray-100">
+                            <button class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-2 px-4 rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-300 text-sm font-medium">
+                                <i class="fas fa-info-circle mr-2"></i>
+                                View Details
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Highlight search terms
+        function highlightSearchTerm(text, searchTerm) {
+            if (!searchTerm) return text;
+            
+            const regex = new RegExp(`(${searchTerm})`, 'gi');
+            return text.replace(regex, '<span class="search-highlight">$1</span>');
+        }
+
+        // Get route type based on content
+        function getRouteType(route) {
+            const routeLower = route.toLowerCase();
+            if (routeLower.includes('ရန်ကုန်')) {
+                return { name: 'Yangon Route', color: 'bg-blue-500' };
+            } else if (routeLower.includes('မန္တလေး') || routeLower.includes('မန်းလေး')) {
+                return { name: 'Mandalay Route', color: 'bg-green-500' };
+            } else if (routeLower.includes('နေပြည်တော်')) {
+                return { name: 'Naypyidaw Route', color: 'bg-purple-500' };
+            } else if (routeLower.includes('အိမ်အရောက်')) {
+                return { name: 'Home Delivery', color: 'bg-orange-500' };
+            } else if (routeLower.includes('ကုန်ကြွေး')) {
+                return { name: 'Cargo Service', color: 'bg-red-500' };
+            } else {
+                return { name: 'Regional Route', color: 'bg-gray-500' };
+            }
+        }
+
+        // Get route icon
+        function getRouteIcon(route) {
+            const routeLower = route.toLowerCase();
+            if (routeLower.includes('အိမ်အရောက်')) {
+                return 'fas fa-home';
+            } else if (routeLower.includes('ကုန်ကြွေး')) {
+                return 'fas fa-box';
+            } else if (routeLower.includes('ရုံးထုတ်')) {
+                return 'fas fa-building';
+            } else {
+                return 'fas fa-bus';
+            }
+        }
+
+        // Clear search
+        function clearSearch() {
+            searchInput.value = '';
+            routeFilter.value = 'all';
+            currentSearchTerm = '';
+            applyFilters();
+            searchInput.focus();
+        }
+
+        // Initialize app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
