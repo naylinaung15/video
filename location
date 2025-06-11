@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Myanmar Transportation Data Search</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Myanmar:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Noto Sans Myanmar', sans-serif;
+        }
+        
+        .myanmar-text {
+            font-family: 'Noto Sans Myanmar', sans-serif;
+            line-height: 1.6;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .card-shadow {
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .search-input:focus {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+        
+        .table-row:hover {
+            background: linear-gradient(90deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+            transform: translateX(2px);
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.8));
+            backdrop-filter: blur(10px);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="gradient-bg text-white py-8">
+        <div class="container mx-auto px-4">
+            <div class="text-center">
+                <h1 class="text-4xl font-bold mb-2 myanmar-text">
+                    <i class="fas fa-bus mr-3"></i>
+                    Myanmar Transportation Data
+                </h1>
+                <p class="text-xl opacity-90 myanmar-text">ယာဉ်စီးနှင်းမှုအချက်အလက်များ ရှာဖွေရန်</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Search and Stats Section -->
+    <div class="container mx-auto px-4 py-8">
+        <!-- Search Bar -->
+        <div class="mb-8">
+            <div class="max-w-2xl mx-auto">
+                <div class="relative">
+                    <input 
+                        type="text" 
+                        id="searchInput" 
+                        placeholder="နေရာအမည်ဖြင့် ရှာဖွေပါ... (Search by location)"
+                        class="w-full px-6 py-4 pl-12 text-lg border-2 border-gray-200 rounded-full focus:outline-none focus:border-purple-500 search-input transition-all duration-300 myanmar-text"
+                    >
+                    <i class="fas fa-search absolute left-4 top-5 text-gray-400 text-lg"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="stat-card rounded-xl p-6 card-shadow">
+                <div class="flex items-center">
+                    <div class="bg-blue-500 p-3 rounded-full mr-4">
+                        <i class="fas fa-map-marker-alt text-white"></i>
+                    </div>
+                    <div>
+                        <p class="text-gray-600 text-sm myanmar-text">စုစုပေါင်းနေရာများ</p>
+                        <p class="text-2xl font-bold text-gray-800" id="totalLocations">0</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stat-card rounded-xl p-6 card-shadow">
+                <div class="flex items-center">
+                    <div class="bg-green-500 p-3 rounded-full mr-4">
+                        <i class="fas fa-users text-white"></i>
+                    </div>
+                    <div>
+                        <p class="text-gray-600 text-sm myanmar-text">စုစုပေါင်းလူအရေအတွက်</p>
+                        <p class="text-2xl font-bold text-gray-800" id="totalPeople">0</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stat-card rounded-xl p-6 card-shadow">
+                <div class="flex items-center">
+                    <div class="bg-yellow-500 p-3 rounded-full mr-4">
+                        <i class="fas fa-money-bill text-white"></i>
+                    </div>
+                    <div>
+                        <p class="text-gray-600 text-sm myanmar-text">စုစုပေါင်းဈေးနှုန်း</p>
+                        <p class="text-2xl font-bold text-gray-800" id="totalPrice">0</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stat-card rounded-xl p-6 card-shadow">
+                <div class="flex items-center">
+                    <div class="bg-purple-500 p-3 rounded-full mr-4">
+                        <i class="fas fa-filter text-white"></i>
+                    </div>
+                    <div>
+                        <p class="text-gray-600 text-sm myanmar-text">ရှာဖွေတွေ့ရှိမှု</p>
+                        <p class="text-2xl font-bold text-gray-800" id="filteredCount">0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Table -->
+        <div class="bg-white rounded-xl card-shadow overflow-hidden">
+            <div class="px-6 py-4 bg-gray-50 border-b">
+                <h2 class="text-xl font-semibold text-gray-800 myanmar-text">
+                    <i class="fas fa-table mr-2"></i>
+                    ယာဉ်စီးနှင်းမှုအချက်အလက်များ
+                </h2>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700 myanmar-text">နေရာ</th>
+                            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700 myanmar-text">ဦးရေ</th>
+                            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700 myanmar-text">ဈေးနှုန်း</th>
+                            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700 myanmar-text">စုစုပေါင်းဦးရေ</th>
+                            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700 myanmar-text">စုစုပေါင်းဈေးနှုန်း</th>
+                            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700 myanmar-text">မှတ်ချက်</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dataTableBody" class="divide-y divide-gray-200">
+                        <!-- Data will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Transportation data
+        const transportData = [
+            {location: "ဖတ်ပဒဲ", people: 1, price: 700, totalPeople: 1, totalPrice: 700, notes: ""},
+            {location: "Chonburi", people: 1, price: 1300, totalPeople: "", totalPrice: "", notes: ""},
+            {location: "စမူစခွန်", people: 1, price: 700, totalPeople: 2, totalPrice: 2000, notes: ""},
+            {location: "နွန်ထပူရီ", people: 1, price: 700, totalPeople: "", totalPrice: "", notes: ""},
+            {location: "စူကိုဝစ်", people: 1, price: 700, totalPeople: "", totalPrice: "", notes: ""},
+            {location: "ပထုံဌာနီ", people: 2, price: 1400, totalPeople: 2, totalPrice: 1400, notes: ""},
+            {location: "ဘန်ဘော", people: 1, price: 700, totalPeople: 1, totalPrice: 700, notes: ""},
+            {location: "သလင်ချန်း", people: 1, price: 700, totalPeople: "", totalPrice: "", notes: ""},
+            {location: "စမူပကန်", people: 1, price: 700, totalPeople: "", totalPrice: "", notes: ""},
+            {location: "စမူပကန်", people: 1, price: 6500, totalPeople: 3, totalPrice: 7900, notes: "လဝက"},
+            {location: "ဖတ်ထနာကန်", people: 1, price: 700, totalPeople: "", totalPrice: "", notes: ""},
+            {location: "ချွန်ပူရီ", people: 1, price: 1300, totalPeople: "", totalPrice: 2000, notes: ""},
+            {location: "အုန်းယိုင်", people: 2, price: 1400, totalPeople: "", totalPrice: "", notes: ""},
+            {location: "သလင်ချန်း", people: 1, price: 700, totalPeople: "", totalPrice: "", notes: "လူပြန်အတက်"},
+            {location: "မော်ချစ်ကားဝင်း", people: 1, price: 700, totalPeople: "", totalPrice: "", notes: ""},
+            {location: "စမူပကန်", people: 1, price: 1400, totalPeople: 5, totalPrice: 3500, notes: ""},
+            {location: "မဟာချိုင်", people: 1, price: 700, totalPeople: 1, totalPrice: 700, notes: ""},
+            {location: "စမူပကန်", people: 1, price: 700, totalPeople: 1, totalPrice: 700, notes: ""},
+            {location: "ဖလန်းဆောင်", people: 1, price: 6500, totalPeople: 1, totalPrice: 6500, notes: "လဝက"},
+            {location: "chonburiစီလချာ", people: 2, price: 14000, totalPeople: 2, totalPrice: 14000, notes: "လဝက"},
+            {location: "မဟာချိုင်", people: 1, price: 700, totalPeople: 1, totalPrice: 700, notes: "လူပြန်အတက်"},
+            {location: "ပထုံဌာနီ", people: 2, price: 1400, totalPeople: 2, totalPrice: 1400, notes: ""},
+            {location: "လာမင်ထာ", people: 1, price: 6500, totalPeople: 1, totalPrice: 6500, notes: "လဝက"},
+            {location: "စူကိုဝစ်", people: 1, price: 6500, totalPeople: 1, totalPrice: 6500, notes: "လဝက"},
+            {location: "ချာချင်ဆောင်", people: 1, price: 1300, totalPeople: 1, totalPrice: 1300, notes: ""},
+            {location: "ဖလန်း3", people: 1, price: 6500, totalPeople: "", totalPrice: "", notes: "လဝက"},
+            {location: "ဖလန်း3", people: 2, price: 1400, totalPeople: 3, totalPrice: 7900, notes: ""},
+            {location: "စမူပကန်", people: 1, price: 700, totalPeople: "", totalPrice: "", notes: ""},
+            {location: "အုန်းနွဲ့", people: 1, price: 700, totalPeople: "", totalPrice: "", notes: ""},
+            {location: "နွန်ထပူရီ", people: 1, price: 700, totalPeople: 3, totalPrice: 2100, notes: ""},
+            {location: "လတ်ဖောင်း", people: 1, price: 700, totalPeople: 1, totalPrice: 700, notes: ""},
+            {location: "chonburi", people: 1, price: 1300, totalPeople: "", totalPrice: "", notes: "မပြန်ဖြစ်"},
+            {location: "နကော့ပထုံ", people: 1, price: 1000, totalPeople: "", totalPrice: "", notes: ""},
+            {location: "ပချာအူထစ်", people: 1, price: 700, totalPeople: "", totalPrice: "", notes: ""},
+            {location: "Chonburi", people: 2, price: 2600, totalPeople: 4, totalPrice: 4300, notes: ""},
+            {location: "စမူပရကန်", people: 1, price: 700, totalPeople: "", totalPrice: "", notes: "မပြန်ဖြစ်"},
+            {location: "စမူပရကန်", people: 1, price: 700, totalPeople: 1, totalPrice: 700, notes: ""},
+            {location: "မဟာချိုင်", people: 1, price: 700, totalPeople: 1, totalPrice: 700, notes: ""},
+            {location: "စမူပရကန်", people: 3, price: 2100, totalPeople: 3, totalPrice: 2100, notes: "လူပြန်အတက်"},
+            {location: "ဖတ်ထနာကန်", people: 1, price: 700, totalPeople: 1, totalPrice: 700, notes: ""},
+            {location: "ပထုံဌာနီ", people: 1, price: 700, totalPeople: 1, totalPrice: 700, notes: "လူပြန်အတက်"},
+            {location: "ဖတ်ထနာကန်", people: 1, price: 700, totalPeople: 1, totalPrice: 700, notes: "23ရက်မှ ကြိုဖြစ်//မဲဆောက်မှာ ဆင်းပါတယ်"},
+            {location: "ဒင်းဒဲ", people: 1, price: 700, totalPeople: 1, totalPrice: 700, notes: ""},
+            {location: "မဟာချိုင်", people: 3, price: 2100, totalPeople: 3, totalPrice: "", notes: ""},
+            {location: "ပချာအူထစ်", people: 1, price: 700, totalPeople: 1, totalPrice: 2800, notes: "လူပြန်အတက်"},
+            {location: "Chonburi", people: 1, price: 1300, totalPeople: "", totalPrice: "", notes: ""},
+            {location: "မဟာချိုင်", people: 1, price: 700, totalPeople: 2, totalPrice: 2000, notes: "လူပြန်အတက်"},
+            {location: "ဖိကစင်", people: 2, price: 1400, totalPeople: 2, totalPrice: 1400, notes: ""},
+            {location: "Chonburi", people: 2, price: 2600, totalPeople: 2, totalPrice: 2600, notes: ""},
+            {location: "ဖလန်း5", people: 1, price: 700, totalPeople: 1, totalPrice: 700, notes: ""},
+            {location: "စမူပရကန်", people: 1, price: 700, totalPeople: "", totalPrice: "", notes: ""},
+            {location: "မဟာချိုင်", people: 2, price: 1400, totalPeople: 3, totalPrice: 2100, notes: ""},
+            {location: "ပထုံဌာနီ", people: 1, price: 700, totalPeople: 1, totalPrice: 700, notes: ""},
+            {location: "နွန်ထပူရီ", people: 1, price: 6500, totalPeople: "", totalPrice: "", notes: "လဝက"},
+            {location: "ပချာစုံခေါ်", people: 1, price: 700, totalPeople: 2, totalPrice: 7200, notes: "လူပြန်အတက်"},
+            {location: "မင်ပူရီ", people: 2, price: 13000, totalPeople: 2, totalPrice: 13000, notes: "လဝက"},
+            {location: "နကော့ပထုံ", people: 3, price: 3000, totalPeople: 3, totalPrice: 3000, notes: ""},
+            {location: "ဖလန်းဆောင်", people: 1, price: 700, totalPeople: "", totalPrice: "", notes: ""},
+            {location: "စမူပကန်", people: 1, price: 700, totalPeople: "", totalPrice: "", notes: ""},
+            {location: "လာလုကာ", people: 1, price: 700, totalPeople: 3, totalPrice: 2100, notes: ""},
+            {location: "စမူစခွန်", people: 1, price: 700, totalPeople: 1, totalPrice: 700, notes: ""},
+            {location: "စမူပကန်", people: 2, price: 1400, totalPeople: "", totalPrice: "", notes: "လူပြန်အတက်"},
+            {location: "နကော့ပထုံ", people: 3, price: 3000, totalPeople: "", totalPrice: "", notes: "လူပြန်အတက်"},
+            {location: "မဟာချိုင်", people: 2, price: 1400, totalPeople: 7, totalPrice: 5800, notes: "လူပြန်အတက်"},
+            {location: "ဘန်းခဲ", people: 1, price: 700, totalPeople: 1, totalPrice: 700, notes: ""},
+            {location: "ပထုံဌာနီ", people: 1, price: 700, totalPeople: 1, totalPrice: 700, notes: "လူပြန်အတက်"},
+            {location: "အယုဒ္ဓရ", people: 6, price: 4200, totalPeople: 6, totalPrice: 4200, notes: ""},
+            {location: "ဘန်းခဲ", people: 1, price: 6500, totalPeople: 1, totalPrice: 6500, notes: "လဝက"},
+            {location: "နွန်ထပူရီ", people: 2, price: 1400, totalPeople: 2, totalPrice: 1400, notes: ""},
+            {location: "အယုဒ္ဓရ", people: 1, price: 700, totalPeople: 1, totalPrice: 700, notes: ""},
+            {location: "ဘန်းယိုင်", people: 1, price: 700, totalPeople: "", totalPrice: "", notes: ""},
+            {location: "ဒင်းဒဲ", people: 2, price: 1400, totalPeople: "", totalPrice: "", notes: ""},
+            {location: "ပချာအူထစ်", people: 2, price: 1400, totalPeople: 5, totalPrice: 3500, notes: ""},
+            {location: "ဖလန်း2", people: 1, price: 6500, totalPeople: 1, totalPrice: 6500, notes: ""},
+            {location: "နကော့ပထုံ", people: 1, price: 1000, totalPeople: "", totalPrice: "", notes: "လူပြန်အတက်"},
+            {location: "စမူပကန်", people: 1, price: 700, totalPeople: "", totalPrice: "", notes: "လူပြန်အတက်"},
+            {location: "နွန်ထပူရီ", people: 1, price: 700, totalPeople: 3, totalPrice: 2400, notes: "လူပြန်အတက်"},
+            {location: "ဖလန်း9", people: 1, price: 6500, totalPeople: 1, totalPrice: 6500, notes: ""},
+            {location: "စမူပကန်", people: 1, price: 700, totalPeople: 1, totalPrice: 700, notes: ""},
+            {location: "ဖလန်း9", people: 1, price: 700, totalPeople: "", totalPrice: "", notes: ""},
+            {location: "မဟာချိုင်", people: 2, price: 1400, totalPeople: 3, totalPrice: 2100, notes: ""},
+            {location: "မော်ချစ်", people: 1, price: 6500, totalPeople: "", totalPrice: "", notes: ""},
+            {location: "မဟာချိုင်", people: 3, price: 2100, totalPeople: 4, totalPrice: 8600, notes: "လူပြန်အတက်"},
+            {location: "အယုဒ္ဓရ", people: 1, price: 700, totalPeople: 1, totalPrice: 700, notes: ""},
+            {location: "ပထုံဌာနီ", people: 3, price: 2100, totalPeople: "", totalPrice: "", notes: ""},
+            {location: "ဖလန်း2", people: 1, price: 700, totalPeople: "", totalPrice: "", notes: ""},
+            {location: "စဖန်းခွိုင်", people: 1, price: 700, totalPeople: 5, totalPrice: 3500, notes: ""},
+            {location: "စဖန်းခွိုင်", people: 1, price: 700, totalPeople: 1, totalPrice: 700, notes: "လူပြန်အတက်"},
+            {location: "ပချာအူထစ်", people: 2, price: 1400, totalPeople: 2, totalPrice: 1400, notes: "လူပြန်အတက်"},
+            {location: "လမင်ထာ", people: 2, price: 1400, totalPeople: 2, totalPrice: 1400, notes: ""},
+            {location: "အယုဒ္ဓရ", people: 1, price: 1000, totalPeople: "", totalPrice: "", notes: "လူပြန်အတက်"},
+            {location: "စမူစခွန်", people: 2, price: 1400, totalPeople: 3, totalPrice: 2400, notes: "လူပြန်အတက်"},
+            {location: "အယုဒ္ဓရ", people: 1, price: 1000, totalPeople: 1, totalPrice: 1000, notes: ""},
+            {location: "မဟာချိုင်", people: 2, price: 1400, totalPeople: 2, totalPrice: 1400, notes: ""},
+            {location: "ထီယံထလေ", people: 1, price: 700, totalPeople: 1, totalPrice: 700, notes: ""},
+            {location: "စမူပကန်", people: 2, price: 1400, totalPeople: "", totalPrice: "", notes: ""},
+            {location: "လမင်ထာ", people: 1, price: 700, totalPeople: "", totalPrice: "", notes: ""},
+            {location: "ဘန်ဘော", people: 1, price: 700, totalPeople: 4, totalPrice: 2800, notes: "Total-41"},
+            {location: "မဟာချိုင်", people: 3, price: 2100, totalPeople: 3, totalPrice: 2100, notes: ""},
+            {location: "လချာဒါ", people: 1, price: 700, totalPeople: "", totalPrice: "", notes: ""},
+            {location: "စမူပကန်ဘန်ဖီ", people: 2, price: 1400, totalPeople: 3, totalPrice: 2100, notes: ""},
+            {location: "Chonburi", people: 1, price: 1300, totalPeople: 1, totalPrice: 1300, notes: ""},
+            {location: "ပထုံဌာနီ", people: 1, price: 700, totalPeople: "", totalPrice: "", notes: ""},
+            {location: "နကော့ပထုံ", people: 1, price: 1000, totalPeople: "", totalPrice: "", notes: ""},
+            {location: "ပထုံဌာနီ", people: 1, price: 700, totalPeople: "", totalPrice: "", notes: ""},
+            {location: "ထီယံထလေ", people: 1, price: 700, totalPeople: "", totalPrice: "", notes: "လူပြန်အတက်"}
+        ];
+
+        let filteredData = [...transportData];
+
+        function formatNumber(num) {
+            return num ? num.toLocaleString() : '-';
+        }
+
+        function renderTable(data) {
+            const tbody = document.getElementById('dataTableBody');
+            tbody.innerHTML = '';
+
+            data.forEach((item, index) => {
+                const row = document.createElement('tr');
+                row.className = 'table-row transition-all duration-200';
+                
+                row.innerHTML = `
+                    <td class="px-6 py-4 text-sm myanmar-text font-medium text-gray-900">${item.location}</td>
+                    <td class="px-6 py-4 text-sm text-gray-700">${formatNumber(item.people)}</td>
+                    <td class="px-6 py-4 text-sm text-gray-700">${formatNumber(item.price)}</td>
+                    <td class="px-6 py-4 text-sm text-gray-700">${formatNumber(item.totalPeople)}</td>
+                    <td class="px-6 py-4 text-sm text-gray-700">${formatNumber(item.totalPrice)}</td>
+                    <td class="px-6 py-4 text-sm myanmar-text text-gray-600">${item.notes}</td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+
+        function updateStats(data) {
+            const totalLocations = data.length;
+            const totalPeople = data.reduce((sum, item) => sum + (item.people || 0), 0);
+            const totalPrice = data.reduce((sum, item) => sum + (item.price || 0), 0);
+            
+            document.getElementById('totalLocations').textContent = totalLocations;
+            document.getElementById('totalPeople').textContent = formatNumber(totalPeople);
+            document.getElementById('totalPrice').textContent = formatNumber(totalPrice);
+            document.getElementById('filteredCount').textContent = data.length;
+        }
+
+        function filterData(searchTerm) {
+            filteredData = transportData.filter(item => 
+                item.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                item.notes.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+            
+            renderTable(filteredData);
+            updateStats(filteredData);
+        }
+
+        // Event listeners
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            filterData(e.target.value);
+        });
+
+        // Initialize
+        renderTable(transportData);
+        updateStats(transportData);
+    </script>
+</body>
+</html>
